@@ -1,0 +1,50 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+  <id>bin</id>
+
+  <formats>
+    <format>tgz</format>
+  </formats>
+
+  <baseDirectory>bigdatakit-${project.version}-bin</baseDirectory>
+
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <unpack>false</unpack>
+      <useProjectArtifact>false</useProjectArtifact>
+    </dependencySet>
+  </dependencySets>
+
+  <fileSets>
+    <fileSet>
+      <directory>../</directory>
+      <excludes>
+        <exclude>bigdata-common/**</exclude>
+        <exclude>bigdata-dist/**</exclude>
+        <exclude>bigdata-kafka/**</exclude>
+        <exclude>bigdata-sdk/**</exclude>
+        <exclude>bigdata-spark-core/**</exclude>
+        <exclude>bigdata-spark-streaming/**</exclude>
+        <exclude>**/target/**</exclude>
+        <exclude>**/.classpath</exclude>
+        <exclude>**/.project</exclude>
+        <exclude>**/.settings/**</exclude>
+        <exclude>lib/**</exclude>
+      </excludes>
+      <includes>
+        <include>DEVNOTES</include>
+        <include>README</include>
+        <include>README.md</include>
+        <include>LICENSE</include>
+        <include>NOTICE</include>
+        <include>CHANGELOG</include>
+        <include>RELEASE-NOTES</include>
+        <include>bin/**</include>
+        <include>conf/**</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+</assembly>

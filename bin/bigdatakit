@@ -1,0 +1,79 @@
+#!/bin/bash
+
+print_usage() {
+cat <<EOF
+Usage: $0 <command> [options]...
+
+commands:
+  help                             display this help text
+  spark-streaming <jar> [options]  run a Spark Streaming client
+
+spark-streaming options:
+  -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
+  -Dname=<name>             specify the name of Spark application
+  -DzkConnString=<url>      specify the ZooKeeper connection to use
+  -Dtopics=<topics>         specify the Kafka topics with comma seperated
+  -DgroupId=<group>         specify the Kafka consumer group id
+  -DthreadNum=<num>         specify the Kafka consumer thread num
+  -DbatchDuration=<seconds> specify the Spark Streaming batch process duration
+  -D<property>=<value>      specify any Java system property value
+
+EOF
+}
+
+submit_spark_streaming() {
+  dir=`dirname $0`
+  dir=`cd $dir/..; pwd`
+
+  SPARK_STREAMING_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
+
+  if [[ -f $dir/conf/bigdatakit-env.sh ]]; then
+    . $dir/conf/bigdatakit-env.sh
+  fi
+  if [[ -f $SPARK_HOME/conf/spark-env.sh ]]; then
+    source $SPARK_HOME/conf/spark-env.sh
+    . $SPARK_HOME/bin/load-spark-env.sh
+  fi
+
+  userJar=$1; shift
+  if [[ `ls $userJar >/dev/null 2>&1; echo $?` -ne 0 ]]; then
+    echo "$userJar is not existed"
+    exit 1
+  fi
+  USER_JAR=`readlink -f $userJar`
+
+  SPARK_ASSEMBLY_DIR="$SPARK_HOME/lib"
+  SPARK_ASSEMBLY_JAR=$SPARK_ASSEMBLY_DIR/"$(ls -1 "$SPARK_ASSEMBLY_DIR" | grep "^spark-assembly.*hadoop.*\.jar$" || true)"
+
+  BIGDATAKIT_CLASSPATH=$dir/conf
+  SPARK_JARS=file://$dir/conf/reference.conf,file://$USER_JAR
+  for jar in $dir/lib/*.jar; do
+    BIGDATAKIT_CLASSPATH=$BIGDATAKIT_CLASSPATH:$jar
+    SPARK_JARS=$SPARK_JARS,file://$jar
+  done
+
+  LOCAL_CLASSPATH=$SPARK_HOME/conf:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CLASSPATH:$USER_JAR:$SPARK_CLASSPATH
+
+  JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
+
+  $JAVA_HOME/bin/java $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $SPARK_STREAMING_CLASS
+}
+
+COMMAND=$1; shift
+
+case $COMMAND in
+  help)
+    print_usage
+    exit
+    ;;
+
+  spark-streaming)
+    submit_spark_streaming $@
+    exit
+    ;;
+
+  *)
+    print_usage
+    exit
+    ;;
+esac
