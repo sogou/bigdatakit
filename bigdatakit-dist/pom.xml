@@ -108,7 +108,7 @@
                   <directory>/usr/bin/</directory>
                   <sources>
                     <softlinkSource>
-                      <location>/opt/bigdatakit/bin/bigdatakit</location>
+                      <location>/opt/bigdatakit/bin/usr/bin/bigdatakit</location>
                     </softlinkSource>
                   </sources>
                 </mapping>
