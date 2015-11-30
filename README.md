@@ -2,19 +2,33 @@
 
 ---
 
-## Requirements
+## Building
+
+### Requirements
 
 * JDK-1.7
 * Maven
 
----
-
-## Building
+### Building TGZ
 
 ```
-$ mvn clean package
+$ mvn package
 ```
 
-* tgz location: bigdatakit-dist/target/bigdatakit-1.0-SNAPSHOT-bin.tgz
+* tgz location: bigdatakit-dist/target/bigdatakit-*-bin.tgz
+
+### Building RPM
+
+```
+$ mvn package -Prpm
+```
+
+* rpm location: bigdatakit-dist/target/rpm/bigdatakit-dist/RPMS/noarch/bigdatakit-dist-*.noarch.rpm
+
+### Deploy To Remote Maven Repository
+
+```
+$ mvn deploy
+```
 
 ---

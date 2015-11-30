@@ -69,4 +69,67 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>rpm</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>rpm-maven-plugin</artifactId>
+            <version>2.1.4</version>
+            <executions>
+              <execution>
+                <id>generate-rpm</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>rpm</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <group>Development/Libraries</group>
+              <prefix>/opt</prefix>
+              <defineStatements>
+                <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+              </defineStatements>
+              <mappings>
+                <mapping>
+                  <directory>/opt/bigdatakit/</directory>
+                  <username>root</username>
+                  <groupname>root</groupname>
+                  <sources>
+                    <source>
+                      <location>target/bigdatakit-${project.version}-bin/bigdatakit-${project.version}-bin</location>
+                    </source>
+                  </sources>
+                </mapping>
+                <mapping>
+                  <directory>/usr/bin/</directory>
+                  <sources>
+                    <softlinkSource>
+                      <location>/opt/bigdatakit/bin/bigdatakit</location>
+                    </softlinkSource>
+                  </sources>
+                </mapping>
+              </mappings>
+              <preinstallScriptlet>
+                <script>echo "installing now"</script>
+              </preinstallScriptlet>
+              <postinstallScriptlet>
+                <script>echo "installing finish"</script>
+              </postinstallScriptlet>
+              <preremoveScriptlet>
+                <script>echo "uninstalling now"</script>
+              </preremoveScriptlet>
+              <postremoveScriptlet>
+                <script>echo "uninstalling finish"</script>
+              </postremoveScriptlet>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

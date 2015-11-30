@@ -5,6 +5,7 @@
 
   <formats>
     <format>tgz</format>
+    <format>dir</format>
   </formats>
 
   <baseDirectory>bigdatakit-${project.version}-bin</baseDirectory>
