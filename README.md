@@ -2,7 +2,27 @@
 
 ---
 
-## Building
+## User Guide
+
+### Install BigdataKit
+
+```
+$ yum install bigdatakit
+```
+
+### Maven Dependency
+
+```
+<dependency>
+  <groupId>com.sogou.bigdatakit</groupId>
+  <artifactId>bigdatakit-sdk</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
+---
+
+## Developer Guide
 
 ### Requirements
 
