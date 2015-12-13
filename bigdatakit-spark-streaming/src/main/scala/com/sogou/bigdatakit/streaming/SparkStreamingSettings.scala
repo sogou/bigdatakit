@@ -1,7 +1,7 @@
 package com.sogou.bigdatakit.streaming
 
 import com.sogou.bigdatakit.spark.SparkSettings
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.collection.mutable
 
@@ -23,10 +23,15 @@ class SparkStreamingSettings(config: Config, args: Array[String]) extends Serial
   val KAFKA_CONSUMER_GROUP = conf.withFallback(
     ConfigFactory.parseMap(Map("groupId" -> s"default-$KAFKA_TOPICS"))
   ).getString("groupId")
+  val KAFKA_BROKER_LIST = conf.getString("brokerList")
   val KAFKA_CONSUMER_THREAD_NUM = conf.getInt("threadNum")
+  val KAFKA_ZOOKEEPER_SESSION_TIMEOUT = conf.getInt("zkSessionTimeout")
+  val KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT = conf.getInt("zkConnectionTimeout")
+  val KAFKA_OFFSETS_COMMIT_BATCH_INTERVAL = conf.getInt("offsetsCommitBatchInterval")
 
   val SPARK_MASTER_URL = conf.getString("master")
   val SPARK_APP_NAME = conf.getString("name")
+  val KAFKA_APPROACH = conf.getString("approach")
   val BATCH_DURATION_SECONDS = conf.getLong("batchDuration")
 
   val PROCESSOR_CLASS = conf.getString("processor")

@@ -11,11 +11,14 @@ commands:
 spark-streaming options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
   -Dname=<name>             specify the name of Spark application
+  -Dapproach=<Dapproach>    specify the Kafka approach, "receiver-based" or "direct-based"
   -DzkConnString=<url>      specify the ZooKeeper connection to use
   -Dtopics=<topics>         specify the Kafka topics with comma seperated
   -DgroupId=<group>         specify the Kafka consumer group id
-  -DthreadNum=<num>         specify the Kafka consumer thread num
   -DbatchDuration=<seconds> specify the Spark Streaming batch process duration
+  -DthreadNum=<num>         specify the Kafka consumer thread num (only need for "receiver-based")
+  -DbrokerList=<url>        specify the kafka broker list (only need for "direct-based")
+  -DoffsetsCommitBatchInterval=<interval>  specify the Kafka offsets commit batch interval  (only need for "direct-based")
   -D<property>=<value>      specify any Java system property value
 
 EOF
