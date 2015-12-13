@@ -76,9 +76,11 @@ class DirectBasedSparkStreamingDriver(settings: SparkStreamingSettings)
     }.toMap
     LOG.info(s"fromOffsets: $fromOffsets")
 
-    val conf = new SparkConf().
-      setAppName(settings.SPARK_APP_NAME).set("spark.scheduler.mode", "FAIR")
+    val conf = new SparkConf()
     for ((k, v) <- settings.sparkConfigMap) conf.set(k, v)
+    conf.setAppName(settings.SPARK_APP_NAME).setMaster(settings.SPARK_MASTER_URL).
+      set("spark.scheduler.mode", "FAIR")
+
     sscOpt = Some(new StreamingContext(conf, batchDuration))
 
     // create the inputStream from consumer offsets with direct api
