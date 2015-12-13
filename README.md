@@ -2,6 +2,12 @@
 
 ---
 
+BigdataKit is a tool kit to simplify your big data build process.
+
+[http://gitlab.dev.sogou-inc.com/sogou-spark/bigdatakit](http://gitlab.dev.sogou-inc.com/sogou-spark/bigdatakit)
+
+---
+
 ## User Guide
 
 ### Install BigdataKit

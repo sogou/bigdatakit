@@ -14,7 +14,7 @@
   <groupId>com.sogou.bigdatakit</groupId>
   <artifactId>bigdatakit-dist</artifactId>
   <packaging>pom</packaging>
-  <description>BigdataKit is a tool kit to simplify your bigdata build process.</description>
+  <description>BigdataKit is a tool kit to simplify your big data build process.</description>
   <organization>
     <name>cloud_dev@sogou-inc.com</name>
     <url>http://cloud.sogou-inc.com/</url>
