@@ -15,6 +15,7 @@
     <module>bigdatakit-kafka</module>
     <module>bigdatakit-spark-core</module>
     <module>bigdatakit-spark-streaming</module>
+    <module>bigdatakit-hive</module>
     <module>bigdatakit-dist</module>
   </modules>
 
@@ -27,6 +28,7 @@
     <kafka.version>0.8.2.1</kafka.version>
     <flume.version>1.6.0</flume.version>
     <hbase.version>0.98.13-hadoop2</hbase.version>
+    <avro.version>1.7.4</avro.version>
 
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.12</slf4j.version>

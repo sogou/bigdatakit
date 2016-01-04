@@ -12,7 +12,7 @@
   </parent>
 
   <groupId>com.sogou.bigdatakit</groupId>
-  <artifactId>bigdatakit-kafka</artifactId>
+  <artifactId>bigdatakit-hive</artifactId>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -22,34 +22,26 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka_2.10</artifactId>
-      <version>${kafka.version}</version>
+      <groupId>com.sogou.bigdatakit</groupId>
+      <artifactId>bigdatakit-sdk</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sogou.bigdatakit</groupId>
+      <artifactId>bigdatakit-spark-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.10</artifactId>
+      <version>${spark.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.flume</groupId>
-      <artifactId>flume-ng-sdk</artifactId>
-      <version>${flume.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.thrift</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>io.netty</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.avro</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-hive_2.10</artifactId>
+      <version>${spark.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
-
 </project>
