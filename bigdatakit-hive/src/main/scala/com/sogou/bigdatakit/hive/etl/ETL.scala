@@ -1,5 +1,6 @@
 package com.sogou.bigdatakit.hive.etl
 
+import com.sogou.bigdatakit.hive.etl.processor.ETLProcessor
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkContext, SparkConf}
