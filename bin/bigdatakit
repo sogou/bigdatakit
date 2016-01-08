@@ -8,6 +8,7 @@ commands:
   help                             display this help text
   spark-streaming <jar> [options]  run a Spark Streaming client
   create-table <table spec file>   create hive table
+  etl <jar> <logdate> [options]    run a etl job
 
 spark-streaming options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
@@ -17,10 +18,18 @@ spark-streaming options:
   -Dtopics=<topics>         specify the Kafka topics with comma seperated
   -DgroupId=<group>         specify the Kafka consumer group id
   -DbatchDuration=<seconds> specify the Spark Streaming batch process duration
+  -Dprocessor=<class>       specify the processor class
   -DthreadNum=<num>         specify the Kafka consumer thread num (only need for "receiver-based")
   -DbrokerList=<url>        specify the kafka broker list (only need for "direct-based")
   -DoffsetsCommitBatchInterval=<interval>  specify the Kafka offsets commit batch interval  (only need for "direct-based")
   -D<property>=<value>      specify any Java system property value
+
+etl options:
+  -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
+  -Dname=<name>             specify the name of Spark application
+  -Dname=<database>         specify the database
+  -Dname=<table>            specify the table
+  -Dprocessor=<class>       specify the processor class
 
 EOF
 }
@@ -36,16 +45,33 @@ submit_spark_streaming() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR`
   JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
-  SPARK_STREAMING_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
+  MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
-  $JAVA_HOME/bin/java $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $SPARK_STREAMING_CLASS
+  $JAVA_HOME/bin/java $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
 }
 
 create_table() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH
-  CREATE_TABLE_CLASS="com.sogou.bigdatakit.hive.CreateTable"
+  MAIN_CLASS="com.sogou.bigdatakit.hive.CreateTable"
 
-  $JAVA_HOME/bin/java -XX:MaxPermSize=256m -cp $LOCAL_CLASSPATH $CREATE_TABLE_CLASS $@
+  $JAVA_HOME/bin/java -XX:MaxPermSize=256m -cp $LOCAL_CLASSPATH $MAIN_CLASS $@
+}
+
+etl() {
+  userJar=$1; shift
+  if [[ `ls $userJar >/dev/null 2>&1; echo $?` -ne 0 ]]; then
+    echo "$userJar is not existed"
+    exit 1
+  fi
+  logdate=$1; shift
+
+  USER_JAR=`readlink -f $userJar`
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH`
+  JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
+  MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
+
+  $JAVA_HOME/bin/java -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
 classpath_to_sparkjars() {
@@ -73,6 +99,11 @@ case $COMMAND in
 
   create-table)
     create_table $@
+    exit
+    ;;
+
+  etl)
+    etl $@
     exit
     ;;
 
