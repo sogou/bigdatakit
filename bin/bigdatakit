@@ -2,13 +2,13 @@
 
 print_usage() {
 cat <<EOF
-Usage: $0 <command> [options]...
+Usage: $0 <command> [-options] [args...]
 
 commands:
-  help                             display this help text
-  spark-streaming <jar> [options]  run a Spark Streaming client
-  create-table <table spec file>   create hive table
-  etl <jar> <logdate> [options]    run a etl job
+  help                                       display this help text
+  spark-streaming [-options] <jar>           run a Spark Streaming client
+  create-table [-options] <table spec file>  create hive table
+  etl [-options] <jar> <logdate>             run a etl job
 
 spark-streaming options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
@@ -35,16 +35,16 @@ EOF
 }
 
 submit_spark_streaming() {
-  userJar=$1; shift
-  if [[ `ls $userJar >/dev/null 2>&1; echo $?` -ne 0 ]]; then
+  userJar=$ARGS
+  USER_JAR=`get_absolute_path $userJar`
+  if [ $? -ne 0 ]; then
     echo "$userJar is not existed"
-    exit 1
+    return 1
   fi
 
-  USER_JAR=`readlink -f $userJar`
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR`
-  JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
@@ -52,23 +52,24 @@ submit_spark_streaming() {
 
 create_table() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH
+  JAVA_OPTS=$OPTIONS
   MAIN_CLASS="com.sogou.bigdatakit.hive.CreateTable"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m -cp $LOCAL_CLASSPATH $MAIN_CLASS $@
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m $JAVA_OPTS -cp $LOCAL_CLASSPATH $MAIN_CLASS $ARGS
 }
 
 etl() {
-  userJar=$1; shift
-  if [[ `ls $userJar >/dev/null 2>&1; echo $?` -ne 0 ]]; then
+  userJar=`echo $ARGS | awk '{print $1}'`
+  logdate=`echo $ARGS| awk '{print $2}'`
+  USER_JAR=`get_absolute_path $userJar`
+  if [ $? -ne 0 ]; then
     echo "$userJar is not existed"
-    exit 1
+    return 1
   fi
-  logdate=$1; shift
 
-  USER_JAR=`readlink -f $userJar`
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH`
-  JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
   MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
@@ -78,37 +79,72 @@ classpath_to_sparkjars() {
   echo $1 | awk 'BEGIN{RS=":";ORS=","}{if($1!=""){print "file://"$1}}'
 }
 
+get_absolute_path() {
+  path=$1
+  if [[ `ls $path >/dev/null 2>&1; echo $?` -ne 0 ]]; then
+    return 1
+  fi
+  readlink -f $path
+}
+
+parse_params() {
+  COMMAND=$1; shift
+  while (($#)); do
+    if [[ "$1" =~ ^"-" ]]; then
+      OPTIONS="$OPTIONS $1"
+    else
+      ARGS="$ARGS $1"
+      ARGS_NUM=`expr $ARGS_NUM + 1`
+    fi
+    shift
+  done
+}
 
 dir=`dirname $0`
 dir=`cd $dir/..; pwd`
-
 . $dir/conf/bigdatakit-env.sh
 
-COMMAND=$1; shift
+COMMAND=""
+OPTIONS=""
+ARGS=""
+ARGS_NUM=0
+parse_params $@
 
 case $COMMAND in
   help)
     print_usage
-    exit
+    exit 0
     ;;
 
   spark-streaming)
-    submit_spark_streaming $@
-    exit
+    if [ $ARGS_NUM -ne 1 ]; then
+      echo "Usage: $0 spark-streaming [-options] <jar>"
+      exit 1
+    fi
+    submit_spark_streaming
+    exit $?
     ;;
 
   create-table)
-    create_table $@
-    exit
+    if [ $ARGS_NUM -ne 1 ]; then
+      echo "Usage: $0 create-table [-options] <table spec file>"
+      exit 1
+    fi
+    create_table
+    exit $?
     ;;
 
   etl)
-    etl $@
-    exit
+    if [ $ARGS_NUM -ne 2 ]; then
+      echo "Usage: $0 etl [-options] <jar> <logdate>"
+      exit 1
+    fi
+    etl
+    exit $?
     ;;
 
   *)
     print_usage
-    exit
+    exit 1
     ;;
 esac
