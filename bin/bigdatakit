@@ -47,14 +47,14 @@ submit_spark_streaming() {
   JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
-  $JAVA_HOME/bin/java $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
 }
 
 create_table() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH
   MAIN_CLASS="com.sogou.bigdatakit.hive.CreateTable"
 
-  $JAVA_HOME/bin/java -XX:MaxPermSize=256m -cp $LOCAL_CLASSPATH $MAIN_CLASS $@
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m -cp $LOCAL_CLASSPATH $MAIN_CLASS $@
 }
 
 etl() {
@@ -71,7 +71,7 @@ etl() {
   JAVA_OPTS=`echo " $@" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
   MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
 
-  $JAVA_HOME/bin/java -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
 classpath_to_sparkjars() {
