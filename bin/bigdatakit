@@ -60,11 +60,16 @@ create_table() {
 
 etl() {
   userJar=`echo $ARGS | awk '{print $1}'`
-  logdate=`echo $ARGS| awk '{print $2}'`
   USER_JAR=`get_absolute_path $userJar`
   if [ $? -ne 0 ]; then
     echo "$userJar is not existed"
     return 1
+  fi
+  if [ $ARGS_NUM -eq 2 ]; then
+    logdate=`echo $ARGS| awk '{print $2}'`
+  elif [ $ARGS_NUM -eq 3 ]; then
+    logid=`echo $ARGS| awk '{print $2}'`
+    logdate=`echo $ARGS| awk '{print $3}'`
   fi
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH
@@ -135,7 +140,7 @@ case $COMMAND in
     ;;
 
   etl)
-    if [ $ARGS_NUM -ne 2 ]; then
+    if [ $ARGS_NUM -ne 2 ] && [ $ARGS_NUM -ne 3 ]; then
       echo "Usage: $0 etl [-options] <jar> <logdate>"
       exit 1
     fi
