@@ -22,12 +22,13 @@
     <fileSet>
       <directory>../</directory>
       <excludes>
-        <exclude>bigdata-common/**</exclude>
-        <exclude>bigdata-dist/**</exclude>
-        <exclude>bigdata-kafka/**</exclude>
-        <exclude>bigdata-sdk/**</exclude>
-        <exclude>bigdata-spark-core/**</exclude>
-        <exclude>bigdata-spark-streaming/**</exclude>
+        <exclude>bigdatakit-common/**</exclude>
+        <exclude>bigdatakit-dist/**</exclude>
+        <exclude>bigdatakit-kafka/**</exclude>
+        <exclude>bigdatakit-sdk/**</exclude>
+        <exclude>bigdatakit-spark-core/**</exclude>
+        <exclude>bigdatakit-spark-streaming/**</exclude>
+        <exclude>bigdatakit-hive/**</exclude>
         <exclude>**/target/**</exclude>
         <exclude>**/.classpath</exclude>
         <exclude>**/.project</exclude>
