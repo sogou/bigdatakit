@@ -36,11 +36,9 @@ object CreateTable {
 
     val table = tableConfig.getString("table")
     val serde = tableConfig.getString("serde")
-    val fields = tableConfig.getConfig("fields").root().unwrapped().map { kv =>
-      val fieldName = kv._1
-      val fieldType = kv._2.toString
-      (fieldName, fieldType)
-    }.toMap
+    val fields = tableConfig.getConfigList("fields").map { kv =>
+      (kv.getString("name"), kv.getString("type"))
+    }
 
     var database: String = null
     var serdeClass: String = null
