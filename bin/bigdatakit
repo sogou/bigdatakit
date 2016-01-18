@@ -6,9 +6,13 @@ Usage: $0 <command> [-options] [args...]
 
 commands:
   help                                       display this help text
-  spark-streaming [-options] <jar>           run a Spark Streaming client
+  spark-streaming [-options] <jar>           submit a Spark Streaming job
   create-table [-options] <table spec file>  create hive table
-  etl [-options] <jar> <logdate>             run a etl job
+  etl [-options] <jar> <logdate>             submit a etl job
+  spark-submit [spark options]               execute spark-submit command
+  spark-shell [spark options]                execute spark-shell command
+  spark-sql [spark options]                  execute spark-sql command
+
 
 spark-streaming options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
@@ -80,6 +84,18 @@ etl() {
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
+spark-submit() {
+  $SPARK_HOME/bin/spark-submit $@
+}
+
+spark-shell() {
+  $SPARK_HOME/bin/spark-shell $@
+}
+
+spark-sql() {
+  $SPARK_HOME/bin/spark-sql $@
+}
+
 classpath_to_sparkjars() {
   echo $1 | awk 'BEGIN{RS=":";ORS=","}{if($1!=""){print "file://"$1}}'
 }
@@ -145,6 +161,24 @@ case $COMMAND in
       exit 1
     fi
     etl
+    exit $?
+    ;;
+
+  spark-shell)
+    shift
+    spark-shell $@
+    exit $?
+    ;;
+
+  spark-submit)
+    shift
+    spark-submit $@
+    exit $?
+    ;;
+
+  spark-sql)
+    shift
+    spark-sql $@
     exit $?
     ;;
 
