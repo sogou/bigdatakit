@@ -16,7 +16,9 @@ class ETLSettings(config: Config, args: Array[String]) extends Serializable {
 
   import scala.collection.JavaConversions._
 
-  val DATABASE = conf.getString("database")
+  val DATABASE = conf.withFallback(
+    ConfigFactory.parseMap(Map("database" -> s"custom"))
+  ).getString("database")
   val TABLE = conf.getString("table")
   val PROCESSOR_CLASS = conf.getString("processor")
 
