@@ -54,8 +54,8 @@ submit_spark_streaming() {
     return 1
   fi
 
-  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR
-  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR`
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
@@ -63,7 +63,7 @@ submit_spark_streaming() {
 }
 
 create_table() {
-  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   JAVA_OPTS=$OPTIONS
   MAIN_CLASS="com.sogou.bigdatakit.hive.CreateTable"
 
@@ -84,8 +84,8 @@ etl() {
     logdate=`echo $ARGS| awk '{print $3}'`
   fi
 
-  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH
-  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH`
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
   MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
 
@@ -119,15 +119,18 @@ publish_package() {
 }
 
 spark_submit() {
-  $SPARK_HOME/bin/spark-submit $@
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
+  $SPARK_HOME/bin/spark-submit $FULL_PARAMS
 }
 
 spark_shell() {
-  $SPARK_HOME/bin/spark-shell $@
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
+  $SPARK_HOME/bin/spark-shell $FULL_PARAMS
 }
 
 spark_sql() {
-  $SPARK_HOME/bin/spark-sql $@
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
+  $SPARK_HOME/bin/spark-sql $FULL_PARAMS
 }
 
 classpath_to_sparkjars() {
@@ -150,10 +153,12 @@ parse_params() {
         PACKAGES=`echo $1 | awk -F"=" '{print $2}'`
       else
         OPTIONS="$OPTIONS $1"
+        FULL_PARAMS="$FULL_PARAMS $1"
       fi
     else
       ARGS="$ARGS $1"
       ARGS_NUM=`expr $ARGS_NUM + 1`
+      FULL_PARAMS="$FULL_PARAMS $1"
     fi
     shift
   done
@@ -190,6 +195,7 @@ download_packages() {
     fi
     PACKAGES_CLASSPATH=$PACKAGES_CLASSPATH:$LOCAL_PACKAGE_JAR
   done <.packages_list
+  rm -f .packages_list
 }
 
 dir=`dirname $0`
@@ -202,6 +208,7 @@ ARGS=""
 ARGS_NUM=0
 PACKAGES=""
 PACKAGES_CLASSPATH=""
+FULL_PARAMS=""
 parse_params $@
 download_packages $PACKAGES
 
