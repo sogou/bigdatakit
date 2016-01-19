@@ -10,6 +10,7 @@ commands:
   create-table [-options] <table spec file>  create hive table
   etl [-options] <jar> <logdate>             submit a etl job
 
+  generate-project <project name>            generate base project structure
   publish-package <package name> <jar>       publish user defined package with group:artifact:version name format
 
   spark-submit [spark options]               execute spark-submit command
@@ -90,6 +91,11 @@ etl() {
   MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+}
+
+generate_project() {
+  name=`echo $ARGS| awk '{print $1}'`
+  git clone $BIGDATAKIT_STARTUP_GIT_URL $name
 }
 
 publish_package() {
@@ -242,6 +248,15 @@ case $COMMAND in
       exit 1
     fi
     etl
+    exit $?
+    ;;
+
+  generate-project)
+    if [ $ARGS_NUM -ne 1 ]; then
+      echo "Usage: $0 generate-project <project name>"
+      exit 1
+    fi
+    generate_project
     exit $?
     ;;
 

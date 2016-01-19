@@ -28,3 +28,5 @@ export BIGDATAKIT_HDFS_HOME=/user/spark/bigdatakit
 export BIGDATAKIT_HDFS_PACKAGE_DIR=$BIGDATAKIT_HDFS_HOME/packages
 export BIGDATAKIT_LOCAL_HOME=~/.bigdatakit
 export BIGDATAKIT_LOCAL_PACKAGE_DIR=$BIGDATAKIT_LOCAL_HOME/packages
+
+export BIGDATAKIT_STARTUP_GIT_URL=http://gitlab.dev.sogou-inc.com/sogou-spark/bigdatakit-startup.git
