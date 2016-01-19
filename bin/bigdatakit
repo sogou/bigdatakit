@@ -5,13 +5,18 @@ cat <<EOF
 Usage: $0 <command> [-options] [args...]
 
 commands:
-  help                                       display this help text
   spark-streaming [-options] <jar>           submit a Spark Streaming job
+
   create-table [-options] <table spec file>  create hive table
   etl [-options] <jar> <logdate>             submit a etl job
+
+  publish-package <group:artifact:version> <jar>   publish user package
+
   spark-submit [spark options]               execute spark-submit command
   spark-shell [spark options]                execute spark-shell command
   spark-sql [spark options]                  execute spark-sql command
+
+  help                                       display this help text
 
 
 spark-streaming options:
@@ -84,15 +89,41 @@ etl() {
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
-spark-submit() {
+publish_package() {
+  name=`echo $ARGS| awk '{print $1}'`
+  groupId=`echo $name | awk -F":" '{print $1}'`
+  artifactId=`echo $name | awk -F":" '{print $2}'`
+  version=`echo $name | awk -F":" '{print $3}'`
+  if [ X$groupId == X ] || [ X$artifactId == X ] || [ X$version == X ]; then
+    echo "groupId, artifactId or version is empty"
+    return 1
+  fi
+  userJar=`echo $ARGS | awk '{print $2}'`
+  USER_JAR=`get_absolute_path $userJar`
+  if [ $? -ne 0 ]; then
+    echo "$userJar is not existed"
+    return 1
+  fi
+
+  HDFS_PACKAGE_DIR=$BIGDATAKIT_HDFS_PACKAGE_DIR/$groupId/$artifactId/$version
+  HDFS_PACKAGE_JAR=$HDFS_PACKAGE_DIR/$artifactId-$version.jar
+  hadoop fs -mkdir -p $HDFS_PACKAGE_DIR
+  hadoop fs -rm $HDFS_PACKAGE_JAR
+  echo "try to upload to $HDFS_PACKAGE_JAR"
+  hadoop fs -copyFromLocal $USER_JAR $HDFS_PACKAGE_JAR
+  hadoop fs -chmod -R +w $HDFS_PACKAGE_DIR
+  echo "package $groupId:$artifactId:$version pushlish succeed"
+}
+
+spark_submit() {
   $SPARK_HOME/bin/spark-submit $@
 }
 
-spark-shell() {
+spark_shell() {
   $SPARK_HOME/bin/spark-shell $@
 }
 
-spark-sql() {
+spark_sql() {
   $SPARK_HOME/bin/spark-sql $@
 }
 
@@ -164,21 +195,30 @@ case $COMMAND in
     exit $?
     ;;
 
+  publish-package)
+    if [ $ARGS_NUM -ne 2 ]; then
+      echo "Usage: $0 publish-package <group:artifact:version> <jar>"
+      exit 1
+    fi
+    publish_package
+    exit $?
+    ;;
+
   spark-shell)
     shift
-    spark-shell $@
+    spark_shell $@
     exit $?
     ;;
 
   spark-submit)
     shift
-    spark-submit $@
+    spark_submit $@
     exit $?
     ;;
 
   spark-sql)
     shift
-    spark-sql $@
+    spark_sql $@
     exit $?
     ;;
 
