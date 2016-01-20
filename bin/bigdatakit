@@ -97,6 +97,7 @@ generate_project() {
   name=`echo $ARGS| awk '{print $1}'`
   git clone $BIGDATAKIT_STARTUP_GIT_URL $name
   sed -i "s/\${artifactId}/$name/g" $name/pom.xml
+  rm -fr $name/.git
 }
 
 publish_package() {
