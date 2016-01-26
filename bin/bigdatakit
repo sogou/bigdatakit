@@ -43,6 +43,7 @@ etl options:
   -Dname=<database>         specify the database
   -Dname=<table>            specify the table
   -Dprocessor=<class>       specify the processor class
+  -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
 
 EOF
 }
