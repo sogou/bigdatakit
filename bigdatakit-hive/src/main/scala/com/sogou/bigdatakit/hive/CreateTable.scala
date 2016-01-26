@@ -54,7 +54,7 @@ object CreateTable {
         inputFormatClass = ORC_INPUTFORMAT
         outputFormatClass = ORC_OUTPUTFORMAT
         isExternal = false
-        tblproperties = Map("orc.compress" -> "SNAPPY")
+        tblproperties = Map("orc.compress" -> "ZLIB")
       case _ =>
         database = "default"
         serdeClass = serde
