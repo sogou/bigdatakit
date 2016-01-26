@@ -27,6 +27,6 @@ object ETL {
     val sqlContext = new HiveContext(sc)
 
     val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.asInstanceOf[ETLProcessor]
-    processor.run(sqlContext, settings.DATABASE, settings.TABLE, logdate)
+    processor.run(sqlContext, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
   }
 }

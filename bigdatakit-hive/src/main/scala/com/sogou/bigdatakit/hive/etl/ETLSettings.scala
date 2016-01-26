@@ -8,6 +8,8 @@ import com.typesafe.config.{ConfigFactory, Config}
   */
 object ETLSettings {
   val DEFAULT_ROOT_KEY = "root.hive.etl"
+  val DEFAULT_DATABASE = "custom"
+  val DEFAULT_PARALLELISM = 1
 }
 
 class ETLSettings(config: Config, args: Array[String]) extends Serializable {
@@ -17,10 +19,13 @@ class ETLSettings(config: Config, args: Array[String]) extends Serializable {
   import scala.collection.JavaConversions._
 
   val DATABASE = conf.withFallback(
-    ConfigFactory.parseMap(Map("database" -> s"custom"))
+    ConfigFactory.parseMap(Map("database" -> ETLSettings.DEFAULT_DATABASE))
   ).getString("database")
   val TABLE = conf.getString("table")
   val PROCESSOR_CLASS = conf.getString("processor")
+  val PARALLELISM = conf.withFallback(
+    ConfigFactory.parseMap(Map("parallelism" -> ETLSettings.DEFAULT_PARALLELISM.asInstanceOf[Integer]))
+  ).getInt("parallelism")
 
   val SPARK_MASTER_URL = conf.getString("master")
   val SPARK_APP_NAME = conf.withFallback(

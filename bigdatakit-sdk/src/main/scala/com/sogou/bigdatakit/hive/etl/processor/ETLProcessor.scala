@@ -13,11 +13,11 @@ abstract class ETLProcessor extends java.io.Serializable {
     sqlContext.sql(s"alter table $table drop partition (logdate=$logdate)")
   }
 
-  def saveToPartiton(@transient sqlContext: HiveContext,
-                     df: DataFrame, database: String, table: String, logdate: String) = {
+  def saveToPartiton(@transient sqlContext: HiveContext, df: DataFrame,
+                     database: String, table: String, logdate: String, parallelism: Int) = {
     val warehouseRootDir: String = "hdfs://SunshineNameNode2/user/hive/warehouse"
     val tableLocation = s"$warehouseRootDir/$database.db/$table/logdate=$logdate"
-    df.coalesce(1).write.mode(SaveMode.Append).format("orc").save(tableLocation)
+    df.coalesce(parallelism).write.mode(SaveMode.Append).format("orc").save(tableLocation)
     sqlContext.sql(s"dfs -chmod a+w $tableLocation")
     sqlContext.sql(s"use $database")
     sqlContext.sql(s"alter table $table add partition (logdate=$logdate) location '$tableLocation'")
@@ -27,9 +27,9 @@ abstract class ETLProcessor extends java.io.Serializable {
             database: String, table: String, logdate: String): DataFrame
 
   def run(@transient sqlContext: HiveContext,
-          database: String, table: String, logdate: String) = {
+          database: String, table: String, logdate: String, parallelism: Int) = {
     dropPartition(sqlContext, database, table, logdate)
     val df = doETL(sqlContext, database, table, logdate)
-    saveToPartiton(sqlContext, df, database, table, logdate)
+    saveToPartiton(sqlContext, df, database, table, logdate, parallelism)
   }
 }
