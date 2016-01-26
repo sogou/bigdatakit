@@ -40,8 +40,8 @@ spark-streaming options:
 etl options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
   -Dname=<name>             specify the name of Spark application
-  -Dname=<database>         specify the database
-  -Dname=<table>            specify the table
+  -Ddatabase=<database>     specify the database, default custom
+  -Dtable=<table>           specify the table
   -Dprocessor=<class>       specify the processor class
   -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
 
