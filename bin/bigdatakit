@@ -129,17 +129,17 @@ publish_package() {
 
 spark_submit() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  $SPARK_HOME/bin/spark-submit $FULL_PARAMS
+  $SPARK_HOME/bin/spark-submit --conf spark.jars=$SPARK_JARS $FULL_PARAMS
 }
 
 spark_shell() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  $SPARK_HOME/bin/spark-shell $FULL_PARAMS
+  $SPARK_HOME/bin/spark-shell --conf spark.jars=$SPARK_JARS $FULL_PARAMS
 }
 
 spark_sql() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  $SPARK_HOME/bin/spark-sql $FULL_PARAMS
+  $SPARK_HOME/bin/spark-sql --conf spark.jars=$SPARK_JARS $FULL_PARAMS
 }
 
 classpath_to_sparkjars() {
