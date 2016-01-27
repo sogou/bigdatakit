@@ -38,7 +38,7 @@ public abstract class TextDeserializer extends AbstractDeserializer {
   @Override
   public Object deserialize(Writable writable) throws SerDeException {
     row.clear();
-    return deserialize(((Text) writable).toString(), row);
+    return deserialize((Text) writable, row);
   }
 
   @Override
@@ -51,5 +51,5 @@ public abstract class TextDeserializer extends AbstractDeserializer {
     return null;
   }
 
-  public abstract List<Object> deserialize(String line, List<Object> reuse);
+  public abstract List<Object> deserialize(Text text, List<Object> reuse);
 }
