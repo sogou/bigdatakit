@@ -9,5 +9,5 @@ import org.apache.spark.sql.hive.HiveContext
   */
 abstract class HbaseETLProcessor extends java.io.Serializable {
   def doETL(@transient sqlContext: HiveContext, namespace: String, table: String,
-            logdate: String): RDD[(String, Map[String, Map[String, (SpecificRecordBase, Long)]])]
+            logdate: String): RDD[(String, Map[String, (SpecificRecordBase, Long)])]
 }

@@ -9,6 +9,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 object HbaseETLSettings {
   val DEFAULT_ROOT_KEY = "root.hbase.etl"
   val DEFAULT_NAMESPACE = "default"
+  val DEFAULT_COLUMN_FAMILY = "cf"
   val DEFAULT_APPROACH = "put"
   val DEFAULT_PARALLELISM = 1
 }
@@ -23,6 +24,9 @@ class HbaseETLSettings(config: Config, args: Array[String]) extends Serializable
     ConfigFactory.parseMap(Map("namespace" -> HbaseETLSettings.DEFAULT_NAMESPACE))
   ).getString("namespace")
   val TABLE = conf.getString("table")
+  val COLUMN_FAMILY = conf.withFallback(
+    ConfigFactory.parseMap(Map("columnFamily" -> HbaseETLSettings.DEFAULT_COLUMN_FAMILY))
+  ).getString("columnFamily")
   val PROCESSOR_CLASS = conf.getString("processor")
   val APPROACH = conf.withFallback(
     ConfigFactory.parseMap(Map("approach" -> HbaseETLSettings.DEFAULT_APPROACH))

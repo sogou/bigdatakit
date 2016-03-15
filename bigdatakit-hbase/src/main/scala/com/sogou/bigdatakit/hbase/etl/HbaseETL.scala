@@ -43,8 +43,10 @@ object HbaseETL {
     }
 
     settings.APPROACH match {
-      case "put" => rdd.toHBase(s"${settings.NAMESPACE}:${settings.TABLE}")
-      case "bulkload" => rdd.toHBaseBulk(s"${settings.NAMESPACE}:${settings.TABLE}")
+      case "put" => rdd.toHBase(
+        s"${settings.NAMESPACE}:${settings.TABLE}", settings.COLUMN_FAMILY)
+      case "bulkload" => rdd.toHBaseBulk(
+        s"${settings.NAMESPACE}:${settings.TABLE}", settings.COLUMN_FAMILY)
       case other => throw new RuntimeException(s"no such hbase import approach: $other}")
     }
   }
