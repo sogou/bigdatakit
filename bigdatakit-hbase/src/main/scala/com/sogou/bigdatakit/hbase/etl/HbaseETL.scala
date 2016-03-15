@@ -3,7 +3,7 @@ package com.sogou.bigdatakit.hbase.etl
 import com.sogou.bigdatakit.common.util.AvroUtils
 import com.sogou.bigdatakit.hbase.etl.processor.HbaseETLProcessor
 import com.typesafe.config.ConfigFactory
-import org.apache.avro.generic.GenericRecord
+import org.apache.avro.specific.SpecificRecordBase
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -38,8 +38,8 @@ object HbaseETL {
     val rdd = processor.doETL(sqlContext, settings.NAMESPACE, settings.TABLE, logdate).
       coalesce(settings.PARALLELISM)
 
-    implicit val avroWriter = new Writes[GenericRecord] {
-      def write(data: GenericRecord) = AvroUtils.avroObjectToBytes(data)
+    implicit val avroWriter = new Writes[SpecificRecordBase] {
+      def write(data: SpecificRecordBase) = AvroUtils.avroObjectToBytes(data)
     }
 
     settings.APPROACH match {

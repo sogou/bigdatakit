@@ -290,7 +290,7 @@ case $COMMAND in
       echo "Usage: $0 hbase-etl [-options] <jar> <logdate>"
       exit 1
     fi
-    hive-etl
+    hbase-etl
     exit $?
     ;;
 
