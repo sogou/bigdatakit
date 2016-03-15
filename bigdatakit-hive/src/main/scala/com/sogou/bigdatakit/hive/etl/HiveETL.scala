@@ -1,6 +1,6 @@
 package com.sogou.bigdatakit.hive.etl
 
-import com.sogou.bigdatakit.hive.etl.processor.ETLProcessor
+import com.sogou.bigdatakit.hive.etl.processor.HiveETLProcessor
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkContext, SparkConf}
@@ -26,7 +26,7 @@ object HiveETL {
     val sc = new SparkContext(conf)
     val sqlContext = new HiveContext(sc)
 
-    val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.asInstanceOf[ETLProcessor]
+    val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.asInstanceOf[HiveETLProcessor]
     processor.run(sqlContext, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
   }
 }

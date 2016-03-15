@@ -6,7 +6,7 @@ import org.apache.spark.sql.{DataFrame, SaveMode}
 /**
   * Created by Tao Li on 2016/1/8.
   */
-abstract class ETLProcessor extends java.io.Serializable {
+abstract class HiveETLProcessor extends java.io.Serializable {
   def dropPartition(@transient sqlContext: HiveContext,
                     database: String, table: String, logdate: String) = {
     sqlContext.sql(s"use $database")

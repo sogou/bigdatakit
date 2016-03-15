@@ -35,12 +35,12 @@ object HbaseETL {
 
     implicit val hbaseConfig = HBaseConfig()
 
+    val rdd = processor.doETL(sqlContext, settings.NAMESPACE, settings.TABLE, logdate).
+      coalesce(settings.PARALLELISM)
+
     implicit val avroWriter = new Writes[GenericRecord] {
       def write(data: GenericRecord) = AvroUtils.avroObjectToBytes(data)
     }
-
-    val rdd = processor.doETL[GenericRecord](
-      sqlContext, settings.NAMESPACE, settings.TABLE, logdate).coalesce(settings.PARALLELISM)
 
     settings.APPROACH match {
       case "put" => rdd.toHBase(s"${settings.NAMESPACE}:${settings.TABLE}")
