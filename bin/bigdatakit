@@ -52,6 +52,7 @@ hbase-etl options:
   -Dname=<name>             specify the name of Spark application
   -Dnamespace=<namespace>   specify the database, default default
   -Dtable=<table>           specify the table
+  -DcolumnFamily=<columnFamily>  specify the DcolumnFamily
   -Dprocessor=<class>       specify the processor class
   -Dapproach=<approach>     specify the hbase import approach, "put" or "bulkload"
   -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
