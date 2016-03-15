@@ -8,7 +8,9 @@ commands:
   spark-streaming [-options] <jar>           submit a Spark Streaming job
 
   create-table [-options] <table spec file>  create hive table
-  hive-etl [-options] <jar> <logdate>             submit a hive etl job
+  hive-etl [-options] <jar> <logdate>        submit a hive etl job
+
+  hbase-etl [-options] <jar> <logdate>       submit a hbase etl job
 
   generate-project <project name>            generate base project structure
   publish-package <package name> <jar>       publish user defined package with group:artifact:version name format
