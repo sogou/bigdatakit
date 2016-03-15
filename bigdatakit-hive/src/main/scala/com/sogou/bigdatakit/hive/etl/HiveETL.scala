@@ -8,7 +8,7 @@ import org.apache.spark.{SparkContext, SparkConf}
 /**
   * Created by Tao Li on 2016/1/8.
   */
-object ETL {
+object HiveETL {
   def main(args: Array[String]) {
     if (args.length != 1) {
       System.err.println("logdate is needed")
@@ -16,7 +16,7 @@ object ETL {
     }
 
     val config = ConfigFactory.load()
-    val settings = new ETLSettings(config, args)
+    val settings = new HiveETLSettings(config, args)
 
     val logdate = args(0)
 

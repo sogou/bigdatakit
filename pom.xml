@@ -16,6 +16,7 @@
     <module>bigdatakit-spark-core</module>
     <module>bigdatakit-spark-streaming</module>
     <module>bigdatakit-hive</module>
+    <module>bigdatakit-hbase</module>
     <module>bigdatakit-dist</module>
   </modules>
 

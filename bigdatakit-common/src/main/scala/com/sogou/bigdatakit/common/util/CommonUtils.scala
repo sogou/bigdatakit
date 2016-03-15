@@ -9,7 +9,7 @@ import com.sogou.bigdatakit.common.thread.CallableWithKillable
 /**
  * Created by Tao Li on 2015/8/28.
  */
-object Utils {
+object CommonUtils {
   def getStackTraceStr(exception: Exception): String = {
     val stream: ByteArrayOutputStream = new ByteArrayOutputStream
     exception.printStackTrace(new PrintStream(stream))

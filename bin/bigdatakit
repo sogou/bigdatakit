@@ -8,7 +8,7 @@ commands:
   spark-streaming [-options] <jar>           submit a Spark Streaming job
 
   create-table [-options] <table spec file>  create hive table
-  etl [-options] <jar> <logdate>             submit a etl job
+  hive-etl [-options] <jar> <logdate>             submit a hive etl job
 
   generate-project <project name>            generate base project structure
   publish-package <package name> <jar>       publish user defined package with group:artifact:version name format
@@ -26,7 +26,7 @@ general options:
 spark-streaming options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
   -Dname=<name>             specify the name of Spark application
-  -Dapproach=<Dapproach>    specify the Kafka approach, "receiver-based" or "direct-based"
+  -Dapproach=<approach>     specify the Kafka approach, "receiver-based" or "direct-based"
   -DzkConnString=<url>      specify the ZooKeeper connection to use
   -Dtopics=<topics>         specify the Kafka topics with comma seperated
   -DgroupId=<group>         specify the Kafka consumer group id
@@ -37,12 +37,21 @@ spark-streaming options:
   -DoffsetsCommitBatchInterval=<interval>  specify the Kafka offsets commit batch interval  (only need for "direct-based")
   -D<property>=<value>      specify any Java system property value
 
-etl options:
+hive-etl options:
   -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
   -Dname=<name>             specify the name of Spark application
   -Ddatabase=<database>     specify the database, default custom
   -Dtable=<table>           specify the table
   -Dprocessor=<class>       specify the processor class
+  -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
+
+hbase-etl options:
+  -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
+  -Dname=<name>             specify the name of Spark application
+  -Dnamespace=<namespace>   specify the database, default default
+  -Dtable=<table>           specify the table
+  -Dprocessor=<class>       specify the processor class
+  -Dapproach=<approach>     specify the hbase import approach, "put" or "bulkload"
   -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
 
 EOF
@@ -72,7 +81,7 @@ create_table() {
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m $JAVA_OPTS -cp $LOCAL_CLASSPATH $MAIN_CLASS $ARGS
 }
 
-etl() {
+hive-etl() {
   userJar=`echo $ARGS | awk '{print $1}'`
   USER_JAR=`get_absolute_path $userJar`
   if [ $? -ne 0 ]; then
@@ -89,7 +98,29 @@ etl() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
-  MAIN_CLASS="com.sogou.bigdatakit.hive.etl.ETL"
+  MAIN_CLASS="com.sogou.bigdatakit.hive.etl.HiveETL"
+
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+}
+
+hbase-etl() {
+  userJar=`echo $ARGS | awk '{print $1}'`
+  USER_JAR=`get_absolute_path $userJar`
+  if [ $? -ne 0 ]; then
+    echo "$userJar is not existed"
+    return 1
+  fi
+  if [ $ARGS_NUM -eq 2 ]; then
+    logdate=`echo $ARGS| awk '{print $2}'`
+  elif [ $ARGS_NUM -eq 3 ]; then
+    logid=`echo $ARGS| awk '{print $2}'`
+    logdate=`echo $ARGS| awk '{print $3}'`
+  fi
+
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hbase.etl./g"`
+  MAIN_CLASS="com.sogou.bigdatakit.hbase.etl.HbaseETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
@@ -245,12 +276,21 @@ case $COMMAND in
     exit $?
     ;;
 
-  etl)
+  hive-etl)
     if [ $ARGS_NUM -ne 2 ] && [ $ARGS_NUM -ne 3 ]; then
-      echo "Usage: $0 etl [-options] <jar> <logdate>"
+      echo "Usage: $0 hive-etl [-options] <jar> <logdate>"
       exit 1
     fi
-    etl
+    hive-etl
+    exit $?
+    ;;
+
+  hbase-etl)
+    if [ $ARGS_NUM -ne 2 ] && [ $ARGS_NUM -ne 3 ]; then
+      echo "Usage: $0 hbase-etl [-options] <jar> <logdate>"
+      exit 1
+    fi
+    hive-etl
     exit $?
     ;;
 

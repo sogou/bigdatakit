@@ -1,6 +1,6 @@
 package com.sogou.bigdatakit.streaming
 
-import com.sogou.bigdatakit.common.util.Utils._
+import com.sogou.bigdatakit.common.util.CommonUtils._
 import com.sogou.bigdatakit.kafka.serializer.AvroFlumeEventBodyDecoder
 import com.sogou.bigdatakit.streaming.processor.LineProcessor
 import kafka.serializer.StringDecoder

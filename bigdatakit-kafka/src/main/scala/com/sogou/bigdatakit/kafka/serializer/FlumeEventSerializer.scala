@@ -3,7 +3,7 @@ package com.sogou.bigdatakit.kafka.serializer
 import java.io.ByteArrayInputStream
 import java.util.Collections
 
-import com.sogou.bigdatakit.common.util.Utils._
+import com.sogou.bigdatakit.common.util.CommonUtils._
 import kafka.utils.VerifiableProperties
 import org.apache.avro.io.{BinaryDecoder, DecoderFactory}
 import org.apache.avro.specific.SpecificDatumReader
