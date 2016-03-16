@@ -42,11 +42,10 @@ object HbaseETL {
       def write(data: SpecificRecordBase) = AvroUtils.avroObjectToBytes(data)
     }
 
+    // TODO support custom namespace
     settings.APPROACH match {
-      case "put" => rdd.toHBase(
-        s"${settings.NAMESPACE}:${settings.TABLE}", settings.COLUMN_FAMILY)
-      case "bulkload" => rdd.toHBaseBulk(
-        s"${settings.NAMESPACE}:${settings.TABLE}", settings.COLUMN_FAMILY)
+      case "put" => rdd.toHBase(settings.TABLE, settings.COLUMN_FAMILY)
+      case "bulkload" => rdd.toHBaseBulk(settings.TABLE, settings.COLUMN_FAMILY)
       case other => throw new RuntimeException(s"no such hbase import approach: $other}")
     }
   }
