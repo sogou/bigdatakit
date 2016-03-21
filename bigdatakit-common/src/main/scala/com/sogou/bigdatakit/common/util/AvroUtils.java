@@ -1,9 +1,9 @@
 package com.sogou.bigdatakit.common.util;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.*;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
 
 import java.io.ByteArrayOutputStream;
@@ -18,7 +18,7 @@ public class AvroUtils {
     ByteArrayOutputStream output = new ByteArrayOutputStream();
     BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(output, null);
     DatumWriter<SpecificRecordBase> writer =
-        new GenericDatumWriter<SpecificRecordBase>(object.getSchema());
+        new SpecificDatumWriter<SpecificRecordBase>(object.getSchema());
     try {
       writer.write(object, encoder);
       encoder.flush();
@@ -30,7 +30,7 @@ public class AvroUtils {
 
   public static <T extends SpecificRecordBase> T avroBytesToObject(byte[] bytes, Schema schema)
       throws IOException {
-    DatumReader<SpecificRecordBase> reader = new GenericDatumReader<SpecificRecordBase>(schema);
+    DatumReader<SpecificRecordBase> reader = new SpecificDatumReader<SpecificRecordBase>(schema);
     BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(bytes, null);
     return (T) reader.read(null, decoder);
   }
