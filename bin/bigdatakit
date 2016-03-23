@@ -18,6 +18,7 @@ commands:
   spark-submit [spark options]               execute spark-submit command
   spark-shell [spark options]                execute spark-shell command
   spark-sql [spark options]                  execute spark-sql command
+  presto [presto options]                    execute presto command
 
   help                                       display this help text
 
@@ -176,6 +177,14 @@ spark_sql() {
   $SPARK_HOME/bin/spark-sql --conf spark.jars=$SPARK_JARS $FULL_PARAMS
 }
 
+presto_cli() {
+  $BIGDATAKIT_HOME/bin/ext/presto \
+    --server $PRESTO_COODINATOR_URI \
+    --catalog $PRESTO_DEFAULT_CATALOG \
+    --schema $PRESTO_DEFAULT_SCHEMA \
+    $FULL_PARAMS
+}
+
 classpath_to_sparkjars() {
   echo $1 | awk 'BEGIN{RS=":";ORS=","}{if($1!=""){print "file://"$1}}'
 }
@@ -330,6 +339,12 @@ case $COMMAND in
   spark-sql)
     shift
     spark_sql $@
+    exit $?
+    ;;
+
+  presto)
+    shift
+    presto_cli $@
     exit $?
     ;;
 

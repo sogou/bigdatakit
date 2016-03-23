@@ -16,6 +16,10 @@ for jar in $HIVE_AUXLIB_DIR/*.jar; do
 done
 export HIVE_AUXLIB_CLASSPATH=$HIVE_AUXLIB_CLASSPATH
 
+export PRESTO_COODINATOR_URI=coordinator01.presto01.sjs.ted:8080
+export PRESTO_DEFAULT_CATALOG=hive
+export PRESTO_DEFAULT_SCHEMA=default
+
 export BIGDATAKIT_HOME=/opt/bigdatakit
 export BIGDATAKIT_CONF_DIR=$BIGDATAKIT_HOME/conf
 export BIGDATAKIT_LIB_DIR=$BIGDATAKIT_HOME/lib
