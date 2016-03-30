@@ -8,8 +8,8 @@ commands:
   spark-streaming [-options] <jar>           submit a Spark Streaming job
 
   create-table [-options] <table spec file>  create hive table
-  hive-etl [-options] <jar> <logdate>        submit a hive etl job
 
+  hive-etl [-options] <jar> <logdate>        submit a hive etl job
   hbase-etl [-options] <jar> <logdate>       submit a hbase etl job
 
   generate-project <project name>            generate base project structure
@@ -102,7 +102,7 @@ hive-etl() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hive.etl./g"`
-  MAIN_CLASS="com.sogou.bigdatakit.hive.etl.HiveETL"
+  MAIN_CLASS="com.sogou.bigdatakit.etl.hive.HiveETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
@@ -124,7 +124,7 @@ hbase-etl() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.hbase.etl./g"`
-  MAIN_CLASS="com.sogou.bigdatakit.hbase.etl.HbaseETL"
+  MAIN_CLASS="com.sogou.bigdatakit.etl.hbase.HbaseETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }

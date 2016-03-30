@@ -1,4 +1,4 @@
-package com.sogou.bigdatakit.hive.etl
+package com.sogou.bigdatakit.etl.hive
 
 import com.sogou.bigdatakit.spark.SparkSettings
 import com.typesafe.config.{ConfigFactory, Config}
@@ -7,7 +7,7 @@ import com.typesafe.config.{ConfigFactory, Config}
   * Created by Tao Li on 2016/1/8.
   */
 object HiveETLSettings {
-  val DEFAULT_ROOT_KEY = "root.hive.etl"
+  val DEFAULT_ROOT_KEY = "root.etl.hive"
   val DEFAULT_DATABASE = "custom"
   val DEFAULT_PARALLELISM = 1
 }
@@ -31,8 +31,6 @@ class HiveETLSettings(config: Config, args: Array[String]) extends Serializable 
   val SPARK_APP_NAME = conf.withFallback(
     ConfigFactory.parseMap(Map("name" -> s"ETL-$DATABASE.$TABLE"))
   ).getString("name")
-
-  import scala.collection.JavaConversions._
 
   val sparkConfigMap = sparkSettings.sparkConfigMap
 

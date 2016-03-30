@@ -29,6 +29,8 @@
         <exclude>bigdatakit-spark-core/**</exclude>
         <exclude>bigdatakit-spark-streaming/**</exclude>
         <exclude>bigdatakit-hive/**</exclude>
+        <exclude>bigdatakit-hbase/**</exclude>
+        <exclude>bigdatakit-etl/**</exclude>
         <exclude>**/target/**</exclude>
         <exclude>**/.classpath</exclude>
         <exclude>**/.project</exclude>

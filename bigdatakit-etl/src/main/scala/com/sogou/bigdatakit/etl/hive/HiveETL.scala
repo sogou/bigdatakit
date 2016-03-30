@@ -1,12 +1,11 @@
-package com.sogou.bigdatakit.hive.etl
+package com.sogou.bigdatakit.etl.hive
 
-import com.sogou.bigdatakit.hive.etl.processor.HiveETLProcessor
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkContext, SparkConf}
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
-  * Created by Tao Li on 2016/1/8.
+  * Created by Tao Li on 2016/3/30.
   */
 object HiveETL {
   def main(args: Array[String]) {
@@ -26,7 +25,11 @@ object HiveETL {
     val sc = new SparkContext(conf)
     val sqlContext = new HiveContext(sc)
 
-    val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.asInstanceOf[HiveETLProcessor]
-    processor.run(sqlContext, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
+    val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.
+      asInstanceOf[HiveTransformer]
+
+    HiveETLUtils.dropPartition(sqlContext, settings.DATABASE, settings.TABLE, logdate)
+    val df = processor.transform(sqlContext, logdate)
+    HiveETLUtils.saveToPartiton(sqlContext, df, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
   }
 }

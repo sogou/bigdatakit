@@ -91,6 +91,11 @@
       <artifactId>bigdatakit-hbase</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sogou.bigdatakit</groupId>
+      <artifactId>bigdatakit-etl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <profiles>

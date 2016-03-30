@@ -1,12 +1,12 @@
-package com.sogou.bigdatakit.hive.etl.processor
+package com.sogou.bigdatakit.etl.hive
 
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
 /**
-  * Created by Tao Li on 2016/1/8.
+  * Created by Tao Li on 2016/3/30.
   */
-abstract class HiveETLProcessor extends java.io.Serializable {
+object HiveETLUtils {
   def dropPartition(@transient sqlContext: HiveContext,
                     database: String, table: String, logdate: String) = {
     sqlContext.sql(s"use $database")
@@ -21,15 +21,5 @@ abstract class HiveETLProcessor extends java.io.Serializable {
     sqlContext.sql(s"dfs -chmod a+w $tableLocation")
     sqlContext.sql(s"use $database")
     sqlContext.sql(s"alter table $table add partition (logdate=$logdate) location '$tableLocation'")
-  }
-
-  def doETL(@transient sqlContext: HiveContext,
-            database: String, table: String, logdate: String): DataFrame
-
-  def run(@transient sqlContext: HiveContext,
-          database: String, table: String, logdate: String, parallelism: Int) = {
-    dropPartition(sqlContext, database, table, logdate)
-    val df = doETL(sqlContext, database, table, logdate)
-    saveToPartiton(sqlContext, df, database, table, logdate, parallelism)
   }
 }
