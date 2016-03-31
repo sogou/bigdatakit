@@ -10,23 +10,26 @@ import unicredit.spark.hbase._
   */
 object HBaseETLUtils {
   implicit val hbaseConfig = HBaseConfig()
-  
-  implicit val avroWriter = new Writes[SpecificRecordBase] {
-    def write(data: SpecificRecordBase) = AvroUtils.avroObjectToBytes(data)
+
+  class AvroWrites[T <: SpecificRecordBase] extends Writes[T] {
+    override def write(data: T): Array[Byte] = AvroUtils.avroObjectToBytes(data)
   }
 
-  def toHbase(rdd: RDD[(String, Map[String, Map[String, (SpecificRecordBase, Long)]])],
-              table: String): Unit = {
+  def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, Map[String, (T, Long)]])],
+                                       table: String): Unit = {
+    implicit val avroWriter = new AvroWrites[T]
     rdd.toHBase(table)
   }
 
-  def toHbase(rdd: RDD[(String, Map[String, (SpecificRecordBase, Long)])],
-              table: String, cf: String): Unit = {
+  def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
+                                       table: String, cf: String): Unit = {
+    implicit val avroWriter = new AvroWrites[T]
     rdd.toHBase(table, cf)
   }
 
-  def toHbaseBulk(rdd: RDD[(String, Map[String, (SpecificRecordBase, Long)])],
-                  table: String, cf: String): Unit = {
+  def toHbaseBulk[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
+                                           table: String, cf: String): Unit = {
+    implicit val avroWriter = new AvroWrites[T]
     rdd.toHBaseBulk(table, cf)
   }
 }
