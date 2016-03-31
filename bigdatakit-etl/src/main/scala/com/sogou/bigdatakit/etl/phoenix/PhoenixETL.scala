@@ -1,13 +1,13 @@
-package com.sogou.bigdatakit.etl.hive
+package com.sogou.bigdatakit.etl.phoenix
 
 import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
-  * Created by Tao Li on 2016/3/30.
+  * Created by Tao Li on 2016/3/15.
   */
-object HiveETL {
+object PhoenixETL {
   def main(args: Array[String]) {
     if (args.length != 1) {
       System.err.println("logdate is needed")
@@ -15,7 +15,7 @@ object HiveETL {
     }
 
     val config = ConfigFactory.load()
-    val settings = new HiveETLSettings(config, args)
+    val settings = new PhoenixETLSettings(config, args)
 
     val logdate = args(0)
 
@@ -26,10 +26,9 @@ object HiveETL {
     val sqlContext = new HiveContext(sc)
 
     val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.
-      asInstanceOf[HiveTransformer]
+      asInstanceOf[PhoenixTransformer]
 
-    HiveETLUtils.dropPartition(sqlContext, settings.DATABASE, settings.TABLE, logdate)
     val df = processor.transform(sqlContext, logdate).coalesce(settings.PARALLELISM)
-    HiveETLUtils.saveToPartiton(sqlContext, df, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
+    PhoenixETLUtils.toPhoenix(df, settings.TABLE)
   }
 }

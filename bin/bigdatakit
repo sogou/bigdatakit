@@ -11,6 +11,7 @@ commands:
 
   hive-etl [-options] <jar> <logdate>        submit a hive etl job
   hbase-etl [-options] <jar> <logdate>       submit a hbase etl job
+  phoenix-etl [-options] <jar> <logdate>     submit a phoenix etl job
 
   generate-project <project name>            generate base project structure
   publish-package <package name> <jar>       publish user defined package with group:artifact:version name format
@@ -56,6 +57,13 @@ hbase-etl options:
   -DcolumnFamily=<columnFamily>  specify the DcolumnFamily
   -Dprocessor=<class>       specify the processor class
   -Dapproach=<approach>     specify the hbase import approach, "put" or "bulkload"
+  -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
+
+phoenix-etl options:
+  -Dmaster=<url>            specify the Spark run mode, "local[*]" or "yarn-client"
+  -Dname=<name>             specify the name of Spark application
+  -Dtable=<table>           specify the table
+  -Dprocessor=<class>       specify the processor class
   -Dparallelism=<num>       specify the parallelism which will influence orc file num and write parallelism, default 1
 
 EOF
@@ -125,6 +133,28 @@ hbase-etl() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hbase./g"`
   MAIN_CLASS="com.sogou.bigdatakit.etl.hbase.HBaseETL"
+
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+}
+
+phoenix-etl() {
+  userJar=`echo $ARGS | awk '{print $1}'`
+  USER_JAR=`get_absolute_path $userJar`
+  if [ $? -ne 0 ]; then
+    echo "$userJar is not existed"
+    return 1
+  fi
+  if [ $ARGS_NUM -eq 2 ]; then
+    logdate=`echo $ARGS| awk '{print $2}'`
+  elif [ $ARGS_NUM -eq 3 ]; then
+    logid=`echo $ARGS| awk '{print $2}'`
+    logdate=`echo $ARGS| awk '{print $3}'`
+  fi
+
+  LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
+  SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.phoenix./g"`
+  MAIN_CLASS="com.sogou.bigdatakit.etl.phoenix.PhoenixETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
@@ -303,6 +333,15 @@ case $COMMAND in
       exit 1
     fi
     hbase-etl
+    exit $?
+    ;;
+
+  phoenix-etl)
+    if [ $ARGS_NUM -ne 2 ] && [ $ARGS_NUM -ne 3 ]; then
+      echo "Usage: $0 phoenix-etl [-options] <jar> <logdate>"
+      exit 1
+    fi
+    phoenix-etl
     exit $?
     ;;
 

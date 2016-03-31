@@ -66,5 +66,11 @@
       <artifactId>hbase-rdd_2.10</artifactId>
       <version>0.5.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.phoenix</groupId>
+      <artifactId>phoenix-spark</artifactId>
+      <version>${phoenix.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>
