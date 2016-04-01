@@ -21,6 +21,7 @@ commands:
   spark-sql [spark options]                  execute spark-sql command
   presto [presto options]                    execute presto command
 
+  upgrade [version]                          upgrade bigdatakit include maven, rpm, docker
   help                                       display this help text
 
 
@@ -215,6 +216,25 @@ presto_cli() {
     $FULL_PARAMS
 }
 
+upgrade() {
+  version=$BIGDATAKIT_VERSION
+  if [ $ARGS_NUM -eq 1 ]; then
+    version=`echo $ARGS | awk '{print $1}'`
+  fi
+
+  yum erase bigdatakit -y
+  yum clean all
+  yum install bigdatakit-$version -y
+
+  mavenHomeDir=~/.m2
+  if ! [ -z $M2_HOME ]; then
+    mavenHomeDir=$M2_HOME
+  fi
+  rm -fr $mavenHomeDir/repository/com/sogou/bigdatakit
+
+  docker pull registry.docker.dev.sogou-inc.com:5000/clouddev/bigdatakit:$version
+}
+
 classpath_to_sparkjars() {
   echo $1 | awk 'BEGIN{RS=":";ORS=","}{if($1!=""){print "file://"$1}}'
 }
@@ -384,6 +404,12 @@ case $COMMAND in
   presto)
     shift
     presto_cli $@
+    exit $?
+    ;;
+
+  upgrade)
+    shift
+    upgrade
     exit $?
     ;;
 

@@ -15,24 +15,29 @@ object HBaseETLUtils {
     override def write(data: T): Array[Byte] = AvroUtils.avroObjectToBytes(data)
   }
 
+  def preProcess[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, Map[String, (T, Long)]])],
+                                          parallelism: Int) = {
+    rdd.filter(t => t._1 != null && t._1 != "").coalesce(parallelism)
+  }
+
   def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, Map[String, (T, Long)]])],
                                        table: String,
                                        parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.coalesce(parallelism).toHBase(table)
+    preProcess(rdd, parallelism).toHBase(table)
   }
 
   def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
                                        table: String, cf: String,
                                        parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.coalesce(parallelism).toHBase(table, cf)
+    rdd.toHBase(table, cf)
   }
 
   def toHbaseBulk[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
                                            table: String, cf: String,
                                            parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.coalesce(parallelism).toHBaseBulk(table, cf)
+    rdd.toHBaseBulk(table, cf)
   }
 }
