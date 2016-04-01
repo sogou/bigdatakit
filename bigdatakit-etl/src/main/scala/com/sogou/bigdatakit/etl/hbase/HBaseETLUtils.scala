@@ -15,8 +15,7 @@ object HBaseETLUtils {
     override def write(data: T): Array[Byte] = AvroUtils.avroObjectToBytes(data)
   }
 
-  def preProcess[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, Map[String, (T, Long)]])],
-                                          parallelism: Int) = {
+  def preProcess[T](rdd: RDD[(String, T)], parallelism: Int) = {
     rdd.filter(t => t._1 != null && t._1 != "").coalesce(parallelism)
   }
 
@@ -31,13 +30,13 @@ object HBaseETLUtils {
                                        table: String, cf: String,
                                        parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.toHBase(table, cf)
+    preProcess(rdd, parallelism).toHBase(table, cf)
   }
 
   def toHbaseBulk[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
                                            table: String, cf: String,
                                            parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.toHBaseBulk(table, cf)
+    preProcess(rdd, parallelism).toHBaseBulk(table, cf)
   }
 }
