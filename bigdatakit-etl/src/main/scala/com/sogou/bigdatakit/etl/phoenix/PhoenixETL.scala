@@ -1,6 +1,7 @@
 package com.sogou.bigdatakit.etl.phoenix
 
 import com.typesafe.config.ConfigFactory
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -28,7 +29,11 @@ object PhoenixETL {
     val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.
       asInstanceOf[PhoenixTransformer]
 
-    val df = processor.transform(sqlContext, logdate).coalesce(settings.PARALLELISM)
+    def getLogdate = udf(() => logdate.toLong)
+
+    val df = processor.transform(sqlContext, logdate).
+      withColumn("logdate", getLogdate()).
+      coalesce(settings.PARALLELISM)
     PhoenixETLUtils.toPhoenix(df, settings.TABLE)
   }
 }
