@@ -1,6 +1,5 @@
 package com.sogou.bigdatakit.etl.hive
 
-import com.sogou.bigdatakit.etl.hbase.HBaseETLSettings
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
