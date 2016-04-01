@@ -1,5 +1,6 @@
 package com.sogou.bigdatakit.etl.hive
 
+import com.sogou.bigdatakit.etl.hbase.HBaseETLSettings
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
@@ -14,10 +15,11 @@ object HiveETLUtils {
   }
 
   def saveToPartiton(@transient sqlContext: HiveContext, df: DataFrame,
-                     database: String, table: String, logdate: String) = {
+                     database: String, table: String, logdate: String,
+                     parallelism: Int = HiveETLSettings.DEFAULT_PARALLELISM) = {
     val warehouseRootDir: String = "hdfs://SunshineNameNode2/user/hive/warehouse"
     val tableLocation = s"$warehouseRootDir/$database.db/$table/logdate=$logdate"
-    df.write.mode(SaveMode.Append).format("orc").save(tableLocation)
+    df.coalesce(parallelism).write.mode(SaveMode.Append).format("orc").save(tableLocation)
     sqlContext.sql(s"dfs -chmod a+w $tableLocation")
     sqlContext.sql(s"use $database")
     sqlContext.sql(s"alter table $table add partition (logdate=$logdate) location '$tableLocation'")

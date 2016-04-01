@@ -32,8 +32,7 @@ object PhoenixETL {
     def getLogdate = udf(() => logdate.toLong)
 
     val df = processor.transform(sqlContext, logdate).
-      withColumn("logdate", getLogdate()).
-      coalesce(settings.PARALLELISM)
-    PhoenixETLUtils.toPhoenix(df, settings.TABLE)
+      withColumn("logdate", getLogdate())
+    PhoenixETLUtils.toPhoenix(df, settings.TABLE, settings.PARALLELISM)
   }
 }

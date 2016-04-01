@@ -29,7 +29,7 @@ object HiveETL {
       asInstanceOf[HiveTransformer]
 
     HiveETLUtils.dropPartition(sqlContext, settings.DATABASE, settings.TABLE, logdate)
-    val df = processor.transform(sqlContext, logdate).coalesce(settings.PARALLELISM)
-    HiveETLUtils.saveToPartiton(sqlContext, df, settings.DATABASE, settings.TABLE, logdate)
+    val df = processor.transform(sqlContext, logdate)
+    HiveETLUtils.saveToPartiton(sqlContext, df, settings.DATABASE, settings.TABLE, logdate, settings.PARALLELISM)
   }
 }

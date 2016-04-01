@@ -16,20 +16,23 @@ object HBaseETLUtils {
   }
 
   def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, Map[String, (T, Long)]])],
-                                       table: String): Unit = {
+                                       table: String,
+                                       parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.toHBase(table)
+    rdd.coalesce(parallelism).toHBase(table)
   }
 
   def toHbase[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
-                                       table: String, cf: String): Unit = {
+                                       table: String, cf: String,
+                                       parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.toHBase(table, cf)
+    rdd.coalesce(parallelism).toHBase(table, cf)
   }
 
   def toHbaseBulk[T <: SpecificRecordBase](rdd: RDD[(String, Map[String, (T, Long)])],
-                                           table: String, cf: String): Unit = {
+                                           table: String, cf: String,
+                                           parallelism: Int = HBaseETLSettings.DEFAULT_PARALLELISM): Unit = {
     implicit val avroWriter = new AvroWrites[T]
-    rdd.toHBaseBulk(table, cf)
+    rdd.coalesce(parallelism).toHBaseBulk(table, cf)
   }
 }

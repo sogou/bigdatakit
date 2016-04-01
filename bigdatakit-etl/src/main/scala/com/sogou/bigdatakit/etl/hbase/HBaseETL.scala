@@ -27,16 +27,16 @@ object HBaseETL {
 
     Class.forName(settings.PROCESSOR_CLASS).newInstance match {
       case processor: HBaseAvroTransformer =>
-        val rdd = processor.transform(sqlContext, logdate).coalesce(settings.PARALLELISM)
+        val rdd = processor.transform(sqlContext, logdate)
         settings.APPROACH match {
-          case "put" => HBaseETLUtils.toHbase(rdd, settings.TABLE)
+          case "put" => HBaseETLUtils.toHbase(rdd, settings.TABLE, settings.PARALLELISM)
           case other => throw new RuntimeException(s"not support approach: $other}")
         }
       case processor: HBaseCFAvroTransformer =>
-        val rdd = processor.transform(sqlContext, logdate).coalesce(settings.PARALLELISM)
+        val rdd = processor.transform(sqlContext, logdate)
         settings.APPROACH match {
-          case "put" => HBaseETLUtils.toHbase(rdd, settings.TABLE, settings.COLUMN_FAMILY)
-          case "bulkload" => HBaseETLUtils.toHbaseBulk(rdd, settings.TABLE, settings.COLUMN_FAMILY)
+          case "put" => HBaseETLUtils.toHbase(rdd, settings.TABLE, settings.COLUMN_FAMILY, settings.PARALLELISM)
+          case "bulkload" => HBaseETLUtils.toHbaseBulk(rdd, settings.TABLE, settings.COLUMN_FAMILY, settings.PARALLELISM)
           case other => throw new RuntimeException(s"not support approach: $other}")
         }
       case processor: HBaseETLRunner => processor.run(sqlContext, logdate)
