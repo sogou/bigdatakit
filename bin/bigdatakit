@@ -82,7 +82,7 @@ submit_spark_streaming() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH`
   JAVA_OPTS=()
   for opt in "${OPTIONS[@]}"; do
-    newopt=`echo $opt | sed "s/-D/-Droot.sparkStreaming./`
+    newopt=`echo $opt | sed "s/-D/-Droot.sparkStreaming./"`
     JAVA_OPTS+=("$newopt")
   done
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
@@ -119,7 +119,7 @@ hive-etl() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=()
   for opt in "${OPTIONS[@]}"; do
-    newopt=`echo $opt | sed "s/-D/-Droot.etl.hive./`
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.hive./"`
     JAVA_OPTS+=("$newopt")
   done
   MAIN_CLASS="com.sogou.bigdatakit.etl.hive.HiveETL"
@@ -145,7 +145,7 @@ hbase-etl() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=()
   for opt in "${OPTIONS[@]}"; do
-    newopt=`echo $opt | sed "s/-D/-Droot.etl.hbase./`
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.hbase./"`
     JAVA_OPTS+=("$newopt")
   done
   MAIN_CLASS="com.sogou.bigdatakit.etl.hbase.HBaseETL"
@@ -171,7 +171,7 @@ phoenix-etl() {
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
   JAVA_OPTS=()
   for opt in "${OPTIONS[@]}"; do
-    newopt=`echo $opt | sed "s/-D/-Droot.etl.phoenix./`
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.phoenix./"`
     JAVA_OPTS+=("$newopt")
   done
   MAIN_CLASS="com.sogou.bigdatakit.etl.phoenix.PhoenixETL"
@@ -273,7 +273,7 @@ parse_params() {
       if [[ "$1" =~ ^"-Dpackages=" ]]; then
         PACKAGES=`echo $1 | awk -F"=" '{print $2}'`
       else
-        OPTIONS+=($1)
+        OPTIONS+=("$1")
         FULL_PARAMS="$FULL_PARAMS $1"
       fi
     else
