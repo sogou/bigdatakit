@@ -253,6 +253,11 @@ parse_params() {
     if [[ "$1" =~ ^"-" ]]; then
       if [[ "$1" =~ ^"-Dpackages=" ]]; then
         PACKAGES=`echo $1 | awk -F"=" '{print $2}'`
+      elif [[ "$1" =~ ^"-D".*"=" ]]; then
+        i=`expr index "$1" "="`
+        option="${1:0:i}\"${1:i}\""
+        OPTIONS="$OPTIONS $option"
+        FULL_PARAMS="$FULL_PARAMS $option"
       else
         OPTIONS="$OPTIONS $1"
         FULL_PARAMS="$FULL_PARAMS $1"
