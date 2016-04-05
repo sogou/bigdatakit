@@ -80,7 +80,7 @@ submit_spark_streaming() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.sparkStreaming./"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
@@ -110,7 +110,7 @@ hive-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hive./"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hive./g"`
   MAIN_CLASS="com.sogou.bigdatakit.etl.hive.HiveETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
@@ -132,7 +132,7 @@ hbase-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hbase./"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hbase./g"`
   MAIN_CLASS="com.sogou.bigdatakit.etl.hbase.HBaseETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
@@ -154,7 +154,7 @@ phoenix-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.phoenix./"`
+  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.phoenix./g"`
   MAIN_CLASS="com.sogou.bigdatakit.etl.phoenix.PhoenixETL"
 
   $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
