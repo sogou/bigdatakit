@@ -80,18 +80,25 @@ submit_spark_streaming() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.sparkStreaming./g"`
+  JAVA_OPTS=()
+  for opt in "${OPTIONS[@]}"; do
+    newopt=`echo $opt | sed "s/-D/-Droot.sparkStreaming./`
+    JAVA_OPTS+=("$newopt")
+  done
   MAIN_CLASS="com.sogou.bigdatakit.streaming.SparkStreaming"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH "${JAVA_OPTS[@]}" -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS
 }
 
 create_table() {
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
-  JAVA_OPTS=$OPTIONS
+  JAVA_OPTS=()
+  for opt in "${OPTIONS[@]}"; do
+    JAVA_OPTS+=("$opt")
+  done
   MAIN_CLASS="com.sogou.bigdatakit.hive.CreateTable"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m $JAVA_OPTS -cp $LOCAL_CLASSPATH $MAIN_CLASS $ARGS
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -XX:MaxPermSize=256m "${JAVA_OPTS[@]}" -cp $LOCAL_CLASSPATH $MAIN_CLASS $ARGS
 }
 
 hive-etl() {
@@ -110,10 +117,14 @@ hive-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hive./g"`
+  JAVA_OPTS=()
+  for opt in "${OPTIONS[@]}"; do
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.hive./`
+    JAVA_OPTS+=("$newopt")
+  done
   MAIN_CLASS="com.sogou.bigdatakit.etl.hive.HiveETL"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M "${JAVA_OPTS[@]}" -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
 hbase-etl() {
@@ -132,10 +143,14 @@ hbase-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.hbase./g"`
+  JAVA_OPTS=()
+  for opt in "${OPTIONS[@]}"; do
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.hbase./`
+    JAVA_OPTS+=("$newopt")
+  done
   MAIN_CLASS="com.sogou.bigdatakit.etl.hbase.HBaseETL"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M "${JAVA_OPTS[@]}" -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
 phoenix-etl() {
@@ -154,10 +169,14 @@ phoenix-etl() {
 
   LOCAL_CLASSPATH=$SPARK_CONF_DIR:$SPARK_ASSEMBLY_JAR:$BIGDATAKIT_CONF_DIR:$BIGDATAKIT_CLASSPATH:$SPARK_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH
   SPARK_JARS=`classpath_to_sparkjars $BIGDATAKIT_CLASSPATH:$USER_JAR:$HIVE_AUXLIB_CLASSPATH:$PACKAGES_CLASSPATH`
-  JAVA_OPTS=`echo " $OPTIONS" | sed "s/[ \t]-D/ -Droot.etl.phoenix./g"`
+  JAVA_OPTS=()
+  for opt in "${OPTIONS[@]}"; do
+    newopt=`echo $opt | sed "s/-D/-Droot.etl.phoenix./`
+    JAVA_OPTS+=("$newopt")
+  done
   MAIN_CLASS="com.sogou.bigdatakit.etl.phoenix.PhoenixETL"
 
-  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M $JAVA_OPTS -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
+  $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH -Xmx1G -XX:MaxPermSize=256M "${JAVA_OPTS[@]}" -Dspark.jars=$SPARK_JARS -cp $LOCAL_CLASSPATH $MAIN_CLASS $logdate
 }
 
 generate_project() {
@@ -253,13 +272,8 @@ parse_params() {
     if [[ "$1" =~ ^"-" ]]; then
       if [[ "$1" =~ ^"-Dpackages=" ]]; then
         PACKAGES=`echo $1 | awk -F"=" '{print $2}'`
-      elif [[ "$1" =~ ^-D.+=.*([ ]).*$ ]]; then
-        i=`expr index "$1" "="`
-        option="${1:0:i}'${1:i}'"
-        OPTIONS="$OPTIONS $option"
-        FULL_PARAMS="$FULL_PARAMS $option"
       else
-        OPTIONS="$OPTIONS $1"
+        OPTIONS+=($1)
         FULL_PARAMS="$FULL_PARAMS $1"
       fi
     else
@@ -310,7 +324,7 @@ dir=`cd $dir/..; pwd`
 . $dir/conf/bigdatakit-env.sh
 
 COMMAND=""
-OPTIONS=""
+OPTIONS=()
 ARGS=""
 ARGS_NUM=0
 PACKAGES=""
