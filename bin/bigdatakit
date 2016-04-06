@@ -19,8 +19,10 @@ commands:
   spark-submit [spark options]               execute spark-submit command
   spark-shell [spark options]                execute spark-shell command
   spark-sql [spark options]                  execute spark-sql command
-  presto [presto options]                    execute presto command
+  presto [presto options]                    execute presto client
+  phoenix [phoenix options]                  execute phoenix client
 
+  version                                    display version
   upgrade [version]                          upgrade bigdatakit include maven, rpm, docker
   help                                       display this help text
 
@@ -236,6 +238,10 @@ presto_cli() {
     $FULL_PARAMS
 }
 
+phoenix_cli() {
+  $PHOENIX_HOME/bin/sqlline.py $HBASE_ZOOKEER_QUORUM $FULL_PARAMS
+}
+
 upgrade() {
   version=$BIGDATAKIT_VERSION
   if [ $ARGS_NUM -eq 1 ]; then
@@ -428,6 +434,12 @@ case $COMMAND in
   presto)
     shift
     presto_cli $@
+    exit $?
+    ;;
+  
+  phoenix)
+    shift
+    phoenix_cli $@
     exit $?
     ;;
 

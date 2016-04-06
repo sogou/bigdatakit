@@ -20,6 +20,12 @@ export PRESTO_COODINATOR_URI=coordinator01.presto01.sjs.ted:8080
 export PRESTO_DEFAULT_CATALOG=hive
 export PRESTO_DEFAULT_SCHEMA=default
 
+export HBASE_HOME=/etc/hbase
+export HBASE_CONF_DIR=$HBASE_HOME/conf
+export HBASE_ZOOKEER_QUORUM=`cat $HBASE_CONF_DIR/hbase-site.xml | grep hbase.zookeeper.quorum -A 1 | tail -n 1 | awk -F"<value>" '{print $2}' | awk -F"</value>" '{print $1}'`
+
+export PHOENIX_HOME=/opt/phoenix
+
 export BIGDATAKIT_HOME=/opt/bigdatakit
 export BIGDATAKIT_CONF_DIR=$BIGDATAKIT_HOME/conf
 export BIGDATAKIT_LIB_DIR=$BIGDATAKIT_HOME/lib
