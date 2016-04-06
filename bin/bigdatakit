@@ -228,6 +228,7 @@ spark_sql() {
 }
 
 presto_cli() {
+  export PATH=/usr/lib/jvm/jre-1.8.0-oracle.x86_64/bin:$PATH
   $BIGDATAKIT_HOME/bin/ext/presto \
     --server $PRESTO_COODINATOR_URI \
     --catalog $PRESTO_DEFAULT_CATALOG \

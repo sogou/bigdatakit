@@ -38,7 +38,7 @@ $ yum install bigdatakit
 ### Building TGZ
 
 ```
-$ mvn package
+$ make build
 ```
 
 * tgz location: bigdatakit-dist/target/bigdatakit-*-bin.tgz
@@ -46,14 +46,27 @@ $ mvn package
 ### Building RPM
 
 ```
-$ mvn package -Prpm
+$ mvn rpm-build
 ```
 
 * rpm location: bigdatakit-dist/target/rpm/bigdatakit-dist/RPMS/noarch/bigdatakit-dist-*.noarch.rpm
 
+### Deploy To Remote Maven Repository
 
 ```
-$ mvn deploy
+$ make maven-deploy
+```
+
+### Building Docker
+
+```
+$ make docker-build
+```
+
+### Push To Docker Registry
+
+```
+$ make docker-push
 ```
 
 ### Update Version

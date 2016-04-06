@@ -27,7 +27,7 @@ for jar in $BIGDATAKIT_LIB_DIR/*.jar; do
   BIGDATAKIT_CLASSPATH=$BIGDATAKIT_CLASSPATH:$jar
 done
 export BIGDATAKIT_CLASSPATH=$BIGDATAKIT_CLASSPATH
-export BIGDATAKIT_VERSION=1.1.0
+export BIGDATAKIT_VERSION=`ls -l $BIGDATAKIT_LIB_DIR/bigdatakit-sdk-*.jar | awk -F"sdk-" '{print $NF}' | awk -F".jar" '{print $1}'`
 
 export BIGDATAKIT_HDFS_HOME=/user/spark/bigdatakit
 export BIGDATAKIT_HDFS_PACKAGE_DIR=$BIGDATAKIT_HDFS_HOME/packages
