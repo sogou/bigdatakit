@@ -22,7 +22,7 @@ $ yum install bigdatakit
 <dependency>
   <groupId>com.sogou.bigdatakit</groupId>
   <artifactId>bigdatakit-sdk</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -51,10 +51,15 @@ $ mvn package -Prpm
 
 * rpm location: bigdatakit-dist/target/rpm/bigdatakit-dist/RPMS/noarch/bigdatakit-dist-*.noarch.rpm
 
-### Deploy To Remote Maven Repository
 
 ```
 $ mvn deploy
+```
+
+### Update Version
+
+```
+mvn versions:set -DnewVersion=1.1.0
 ```
 
 ---
