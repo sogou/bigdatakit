@@ -255,6 +255,10 @@ upgrade() {
   docker pull registry.docker.dev.sogou-inc.com:5000/clouddev/bigdatakit:$version
 }
 
+print_version() {
+  echo $BIGDATAKIT_VERSION
+}
+
 classpath_to_sparkjars() {
   echo $1 | awk 'BEGIN{RS=":";ORS=","}{if($1!=""){print "file://"$1}}'
 }
@@ -430,6 +434,12 @@ case $COMMAND in
   upgrade)
     shift
     upgrade
+    exit $?
+    ;;
+  
+  version)
+    shift
+    print_version
     exit $?
     ;;
 
