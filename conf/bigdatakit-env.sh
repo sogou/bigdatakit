@@ -6,6 +6,7 @@ export SPARK_HOME=/opt/spark
 export SPARK_CONF_DIR=$SPARK_HOME/conf
 export SPARK_LIB_DIR=$SPARK_HOME/lib
 export SPARK_ASSEMBLY_JAR=$SPARK_LIB_DIR/"$(ls -1 "$SPARK_LIB_DIR" | grep "^spark-assembly.*hadoop.*\.jar$" || true)"
+export SPARK_DATAUNCLEUS_CLASSPATH=`ls -l $SPARK_LIB_DIR | grep datanucleus | awk 'BEGIN{ORS=":"}{print "'$SPARK_LIB_DIR'/"$NF}'`
 . $SPARK_CONF_DIR/spark-env.sh
 
 export HIVE_HOME=/opt/datadir
