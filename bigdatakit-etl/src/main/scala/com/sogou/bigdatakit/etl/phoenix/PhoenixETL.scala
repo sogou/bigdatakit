@@ -1,7 +1,6 @@
 package com.sogou.bigdatakit.etl.phoenix
 
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -26,13 +25,12 @@ object PhoenixETL {
     val sc = new SparkContext(conf)
     val sqlContext = new HiveContext(sc)
 
-    val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.
-      asInstanceOf[PhoenixTransformer]
-
-    def getLogdate = udf(() => logdate.toLong)
-
-    val df = processor.transform(sqlContext, logdate).
-      withColumn("logdate", getLogdate())
-    PhoenixETLUtils.toPhoenix(df, settings.TABLE, settings.PARALLELISM)
+    Class.forName(settings.PROCESSOR_CLASS).newInstance match {
+      case processor: PhoenixTransformer =>
+        val df = processor.transform(sqlContext, logdate)
+        PhoenixETLUtils.toPhoenix(df, settings.TABLE, logdate, settings.PARALLELISM)
+      case processor: PhoenixRunner => processor.run(sqlContext, logdate)
+      case _ => throw new RuntimeException(s"not support processor: ${settings.PROCESSOR_CLASS}")
+    }
   }
 }

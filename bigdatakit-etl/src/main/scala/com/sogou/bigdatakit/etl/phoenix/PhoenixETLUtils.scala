@@ -1,6 +1,7 @@
 package com.sogou.bigdatakit.etl.phoenix
 
 import org.apache.hadoop.hbase.HBaseConfiguration
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
 /**
@@ -10,13 +11,15 @@ object PhoenixETLUtils {
   val conf = HBaseConfiguration.create()
   val zkUrl = conf.get("hbase.zookeeper.quorum")
 
-  def toPhoenix(df: DataFrame, table: String,
+  def toPhoenix(df: DataFrame, table: String, logdate: String,
                 parallelism: Int = PhoenixETLSettings.DEFAULT_PARALLELISM): Unit = {
-    df.coalesce(parallelism).write.
+    def getLogdate = udf(() => logdate.toLong)
+
+    df.withColumn("logdate", getLogdate()).
+      coalesce(parallelism).write.
       format("org.apache.phoenix.spark").
       mode(SaveMode.Overwrite).
-      options(
-        Map("table" -> table, "zkUrl" -> zkUrl)
-      ).save()
+      options(Map("table" -> table, "zkUrl" -> zkUrl)).
+      save()
   }
 }
