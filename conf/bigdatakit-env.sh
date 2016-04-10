@@ -26,6 +26,10 @@ export HBASE_CONF_DIR=$HBASE_HOME/conf
 export HBASE_ZOOKEER_QUORUM=`cat $HBASE_CONF_DIR/hbase-site.xml | grep hbase.zookeeper.quorum -A 1 | tail -n 1 | awk -F"<value>" '{print $2}' | awk -F"</value>" '{print $1}'`
 
 export PHOENIX_HOME=/opt/phoenix
+export PHOENIX_LIB_DIR=$PHOENIX_HOME/lib
+export PHOENIX_VERSION=`ls -l $PHOENIX_HOME/phoenix-*-server.jar | awk -F"phoenix-" '{print $NF}' | awk -F"-server.jar" '{print $1}'`
+export PHOENIX_SERVER_JAR=$PHOENIX_HOME/phoenix-${PHOENIX_VERSION}-server.jar
+export PHOENIX_SPARK_JAR=$PHOENIX_LIB_DIR/phoenix-spark-${PHOENIX_VERSION}.jar
 
 export BIGDATAKIT_HOME=/opt/bigdatakit
 export BIGDATAKIT_CONF_DIR=$BIGDATAKIT_HOME/conf
