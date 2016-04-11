@@ -1,9 +1,6 @@
-package com.sogou.bigdatakit.hbase.client;
+package com.sogou.bigdatakit.common.db;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.HConnection;
-import org.apache.hadoop.hbase.client.HConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,25 +12,24 @@ import java.util.concurrent.*;
 /**
  * Created by Tao Li on 2016/3/18.
  */
-public class HConnectionPool {
-  private final Logger LOG = LoggerFactory.getLogger(HConnectionPool.class);
+public abstract class ConnectionPool<T> {
+  private final Logger LOG = LoggerFactory.getLogger(ConnectionPool.class);
 
-  private final Configuration conf;
-  private final int initConnectionNum;
-  private final int minConnectionNum;
-  private final int maxConnectionNum;
+  private int initConnectionNum = DEFAULT_INIT_CONNECTION_NUM;
+  private int minConnectionNum = DEFAULT_MIN_CONNECTION_NUM;
+  private int maxConnectionNum = DEFAULT_MAX_CONNECTION_NUM;
 
-  private final TreeSet<PooledConnection> availableConnections;
-  private final TreeSet<PooledConnection> activeConnections;
+  private TreeSet<PooledConnection> availableConnections;
+  private TreeSet<PooledConnection> activeConnections;
 
-  private final long idleTimeout;
-  private final int idleQueueSize;
-  private final BlockingQueue<HConnection> idleConnections;
-  private final Runnable findIdleConnectionThread;
-  private final int idleConnectionCloseThreadPoolSize;
-  private final ExecutorService idleConnectionCloseThreadPool;
+  private long idleTimeout = DEFAULT_IDLE_TIMEOUT;
+  private int idleQueueSize = DEFAULT_IDLE_QUEUE_SIZE;
+  private BlockingQueue<T> idleConnections;
+  private Runnable findIdleConnectionThread;
+  private int idleConnectionCloseThreadPoolSize = DEFAULT_IDLE_CONNECTION_CLOSE_THREAD_POOL_SIZE;
+  private ExecutorService idleConnectionCloseThreadPool;
 
-  private final Object lock = new Object();
+  private Object lock = new Object();
   private volatile boolean isRunning = false;
 
   private final static int DEFAULT_INIT_CONNECTION_NUM = 1;
@@ -43,20 +39,20 @@ public class HConnectionPool {
   private final static int DEFAULT_IDLE_QUEUE_SIZE = 20;
   private final static int DEFAULT_IDLE_CONNECTION_CLOSE_THREAD_POOL_SIZE = 10;
 
-  private static class PooledConnection implements Comparable<PooledConnection> {
-    private HConnection conn;
+  private class PooledConnection implements Comparable<PooledConnection> {
+    private T conn;
     private long time;
 
-    public PooledConnection(HConnection conn) {
+    public PooledConnection(T conn) {
       this(conn, System.currentTimeMillis());
     }
 
-    public PooledConnection(HConnection conn, long time) {
+    public PooledConnection(T conn, long time) {
       this.conn = conn;
       this.time = time;
     }
 
-    public HConnection getConn() {
+    public T getConn() {
       return conn;
     }
 
@@ -120,10 +116,10 @@ public class HConnectionPool {
     public void run() {
       while (isRunning && !Thread.currentThread().isInterrupted()) {
         try {
-          HConnection conn = idleConnections.take();
+          T conn = idleConnections.take();
           try {
             LOG.debug("close connection: " + getPoolInfo());
-            conn.close();
+            closeConnection(conn);
           } catch (Exception e) {
             LOG.error("fail to close connection", e);
           }
@@ -135,82 +131,55 @@ public class HConnectionPool {
     }
   }
 
-  public static class Builder {
-    private Configuration conf;
-    private int initConnectionNum;
-    private int minConnectionNum;
-    private int maxConnectionNum;
-    private long idleTimeout;
-    private int idleQueueSize;
-    private int idleConnectionCloseThreadPoolSize;
-
-    public Builder(Configuration conf) {
-      this.conf = conf;
-      this.initConnectionNum = DEFAULT_INIT_CONNECTION_NUM;
-      this.minConnectionNum = DEFAULT_MIN_CONNECTION_NUM;
-      this.maxConnectionNum = DEFAULT_MAX_CONNECTION_NUM;
-      this.idleTimeout = DEFAULT_IDLE_TIMEOUT;
-      this.idleQueueSize = DEFAULT_IDLE_QUEUE_SIZE;
-      this.idleConnectionCloseThreadPoolSize = DEFAULT_IDLE_CONNECTION_CLOSE_THREAD_POOL_SIZE;
-    }
-
-    public Builder initConnectionNum(int initConnectionNum) {
-      this.initConnectionNum = initConnectionNum;
-      return this;
-    }
-
-    public Builder minConnectionNum(int minConnectionNum) {
-      this.minConnectionNum = minConnectionNum;
-      return this;
-    }
-
-    public Builder maxConnectionNum(int maxConnectionNum) {
-      this.maxConnectionNum = maxConnectionNum;
-      return this;
-    }
-
-    public Builder idleTimeout(long idleTimeout) {
-      this.idleTimeout = idleTimeout;
-      return this;
-    }
-
-    public Builder idleQueueSize(int idleQueueSize) {
-      this.idleQueueSize = idleQueueSize;
-      return this;
-    }
-
-    public Builder idleConnectionCloseThreadPoolSize(int idleConnectionCloseThreadPoolSize) {
-      this.idleConnectionCloseThreadPoolSize = idleConnectionCloseThreadPoolSize;
-      return this;
-    }
-
-    public HConnectionPool build() {
-      return new HConnectionPool(this);
-    }
+  public void setInitConnectionNum(int initConnectionNum) {
+    this.initConnectionNum = initConnectionNum;
   }
 
-  public HConnectionPool(Configuration conf) {
-    this(new Builder(conf));
+  public void setMinConnectionNum(int minConnectionNum) {
+    this.minConnectionNum = minConnectionNum;
   }
 
-  public HConnectionPool(Builder builder) {
-    conf = builder.conf;
-    initConnectionNum = builder.initConnectionNum;
-    minConnectionNum = builder.minConnectionNum;
-    maxConnectionNum = builder.maxConnectionNum;
-    idleTimeout = builder.idleTimeout;
-    idleQueueSize = builder.idleQueueSize;
-    idleConnectionCloseThreadPoolSize = builder.idleConnectionCloseThreadPoolSize;
-    assert maxConnectionNum >= initConnectionNum && maxConnectionNum >= minConnectionNum;
+  public void setMaxConnectionNum(int maxConnectionNum) {
+    this.maxConnectionNum = maxConnectionNum;
+  }
+
+  public void setIdleTimeout(long idleTimeout) {
+    this.idleTimeout = idleTimeout;
+  }
+
+  public void setIdleQueueSize(int idleQueueSize) {
+    this.idleQueueSize = idleQueueSize;
+  }
+
+  public void setIdleConnectionCloseThreadPoolSize(int idleConnectionCloseThreadPoolSize) {
+    this.idleConnectionCloseThreadPoolSize = idleConnectionCloseThreadPoolSize;
+  }
+
+  public synchronized void start() throws ConnectionPoolException {
+    if (isRunning) {
+      throw new ConnectionPoolException("pool is already running");
+    }
+
+    isRunning = true;
 
     availableConnections = new TreeSet<PooledConnection>();
     activeConnections = new TreeSet<PooledConnection>();
 
-    idleConnections = new ArrayBlockingQueue<HConnection>(idleQueueSize, true);
+    idleConnections = new ArrayBlockingQueue<T>(idleQueueSize, true);
     idleConnectionCloseThreadPool = Executors.newFixedThreadPool(
         idleConnectionCloseThreadPoolSize,
         new ThreadFactoryBuilder().setNameFormat("IdleConnectionCloseThread-%d").build());
     findIdleConnectionThread = new FindIdleConnectionThread();
+
+    for (int i = 0; i < idleConnectionCloseThreadPoolSize; i++) {
+      idleConnectionCloseThreadPool.submit(new IdleConnectionCloseThread());
+    }
+
+    new Thread(findIdleConnectionThread, "FindIdleConnectionThread").start();
+
+    for (int i = 0; i < initConnectionNum; i++) {
+      availableConnections.add(createPooledConnection());
+    }
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -220,44 +189,26 @@ public class HConnectionPool {
     });
   }
 
-  public synchronized void start() throws HConnectionPoolException {
-    if (isRunning) {
-      throw new HConnectionPoolException("pool is already running");
-    }
-
-    isRunning = true;
-
-    for (int i = 0; i < idleConnectionCloseThreadPoolSize; i++) {
-      idleConnectionCloseThreadPool.submit(new IdleConnectionCloseThread());
-    }
-
-    new Thread(findIdleConnectionThread, "FindIdleConnectionThread").start();
-
-    for (int i = 0; i < initConnectionNum; i++) {
-      availableConnections.add(createConnection());
-    }
-  }
-
-  private PooledConnection createConnection() throws HConnectionPoolException {
+  private PooledConnection createPooledConnection() throws ConnectionPoolException {
     try {
       LOG.debug("create new connection: " + getPoolInfo());
-      return new PooledConnection(HConnectionManager.createConnection(conf));
+      return new PooledConnection(createConnection());
     } catch (IOException e) {
-      throw new HConnectionPoolException("fail to create connection", e);
+      throw new ConnectionPoolException("fail to create connection", e);
     }
   }
 
-  public HConnection getConnection() throws HConnectionPoolException {
+  public T getConnection() throws ConnectionPoolException {
     if (!isRunning) {
-      throw new HConnectionPoolException("pool is closed");
+      throw new ConnectionPoolException("pool is closed");
     }
     synchronized (lock) {
       LOG.debug("get connection: " + getPoolInfo());
       if (availableConnections.isEmpty()) {
         if (activeConnections.size() >= maxConnectionNum) {
-          throw new HConnectionPoolException("pool is full");
+          throw new ConnectionPoolException("pool is full");
         } else {
-          availableConnections.add(createConnection());
+          availableConnections.add(createPooledConnection());
         }
       }
       PooledConnection pooledConnection = availableConnections.pollFirst();
@@ -267,7 +218,7 @@ public class HConnectionPool {
     }
   }
 
-  public void releaseConnection(HConnection conn) throws HConnectionPoolException {
+  public void releaseConnection(T conn) throws ConnectionPoolException {
     if (conn == null) {
       return;
     }
@@ -285,13 +236,13 @@ public class HConnectionPool {
     }
   }
 
-  private void closeAllConnections(TreeSet<PooledConnection> connections) {
+  private void closeAllPooledConnections(TreeSet<PooledConnection> connections) {
     synchronized (lock) {
       Iterator<PooledConnection> iter = connections.iterator();
       while (iter.hasNext()) {
         PooledConnection pooledConnection = iter.next();
         try {
-          pooledConnection.getConn().close();
+          closeConnection(pooledConnection.getConn());
         } catch (IOException e) {
           // ignore
         }
@@ -305,8 +256,8 @@ public class HConnectionPool {
       return;
     }
 
-    closeAllConnections(availableConnections);
-    closeAllConnections(activeConnections);
+    closeAllPooledConnections(availableConnections);
+    closeAllPooledConnections(activeConnections);
     isRunning = false;
   }
 
@@ -318,4 +269,8 @@ public class HConnectionPool {
         ", active: " + activeConnections.size() +
         ", idle: " + idleConnections.size() + ")";
   }
+
+  protected abstract void closeConnection(T conn) throws IOException;
+
+  protected abstract T createConnection() throws IOException;
 }
