@@ -25,7 +25,7 @@ public abstract class ConnectionPool<T> {
   private long idleTimeout = DEFAULT_IDLE_TIMEOUT;
   private int idleQueueSize = DEFAULT_IDLE_QUEUE_SIZE;
   private BlockingQueue<T> idleConnections;
-  private Runnable findIdleConnectionThread;
+  private Thread findIdleConnectionThread;
   private int idleConnectionCloseThreadPoolSize = DEFAULT_IDLE_CONNECTION_CLOSE_THREAD_POOL_SIZE;
   private ExecutorService idleConnectionCloseThreadPool;
 
@@ -93,7 +93,7 @@ public abstract class ConnectionPool<T> {
                 idleConnections.put(pooledConnection.getConn());
                 iter.remove();
               } catch (InterruptedException e) {
-                LOG.warn("interrupted", e);
+                LOG.warn("interrupted");
                 Thread.currentThread().interrupt();
               }
             }
@@ -103,7 +103,7 @@ public abstract class ConnectionPool<T> {
         try {
           TimeUnit.SECONDS.sleep(CHECK_INTERVAL);
         } catch (InterruptedException e) {
-          LOG.warn("interrupted", e);
+          LOG.warn("interrupted");
           Thread.currentThread().interrupt();
         }
       }
@@ -124,7 +124,7 @@ public abstract class ConnectionPool<T> {
             LOG.error("fail to close connection", e);
           }
         } catch (InterruptedException e) {
-          LOG.warn("interrupted", e);
+          LOG.warn("interrupted");
           Thread.currentThread().interrupt();
         }
       }
@@ -169,24 +169,18 @@ public abstract class ConnectionPool<T> {
     idleConnectionCloseThreadPool = Executors.newFixedThreadPool(
         idleConnectionCloseThreadPoolSize,
         new ThreadFactoryBuilder().setNameFormat("IdleConnectionCloseThread-%d").build());
-    findIdleConnectionThread = new FindIdleConnectionThread();
 
     for (int i = 0; i < idleConnectionCloseThreadPoolSize; i++) {
       idleConnectionCloseThreadPool.submit(new IdleConnectionCloseThread());
     }
 
-    new Thread(findIdleConnectionThread, "FindIdleConnectionThread").start();
+    findIdleConnectionThread = new Thread(
+        new FindIdleConnectionThread(), "FindIdleConnectionThread");
+    findIdleConnectionThread.start();
 
     for (int i = 0; i < initConnectionNum; i++) {
       availableConnections.add(createPooledConnection());
     }
-
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        close();
-      }
-    });
   }
 
   private PooledConnection createPooledConnection() throws ConnectionPoolException {
@@ -259,6 +253,9 @@ public abstract class ConnectionPool<T> {
     closeAllPooledConnections(availableConnections);
     closeAllPooledConnections(activeConnections);
     isRunning = false;
+
+    findIdleConnectionThread.interrupt();
+    idleConnectionCloseThreadPool.shutdownNow();
   }
 
   public String getPoolInfo() {
