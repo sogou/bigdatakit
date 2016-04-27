@@ -29,12 +29,16 @@ class PhoenixETLSettings(config: Config, args: Array[String]) extends Serializab
   ).getString("name")
 
   val sparkConfigMap = sparkSettings.sparkConfigMap
+  val hadoopConfigMap = sparkSettings.hadoopConfigMap
 
   for (entry <- conf.entrySet()) {
     val k = entry.getKey
     val v = entry.getValue.atPath(k).getString(k)
     if (k.startsWith("spark.")) {
       sparkConfigMap.put(k, v)
+    }
+    if(k.startsWith("hadoop.")) {
+      hadoopConfigMap.put(k.substring(7, k.length), v)
     }
   }
 }

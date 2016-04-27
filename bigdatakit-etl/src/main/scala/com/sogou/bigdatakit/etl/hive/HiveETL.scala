@@ -23,6 +23,7 @@ object HiveETL {
     for ((k, v) <- settings.sparkConfigMap) conf.set(k, v)
     conf.setAppName(s"${settings.SPARK_APP_NAME}-$logdate").setMaster(settings.SPARK_MASTER_URL)
     val sc = new SparkContext(conf)
+    for((k, v) <- settings.hadoopConfigMap) sc.hadoopConfiguration.set(k, v)
     val sqlContext = new HiveContext(sc)
 
     val processor = Class.forName(settings.PROCESSOR_CLASS).newInstance.

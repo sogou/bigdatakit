@@ -39,6 +39,7 @@ class SparkStreamingSettings(config: Config, args: Array[String]) extends Serial
 
   val kafkaConfigMap = new mutable.HashMap[String, String]()
   val sparkConfigMap = sparkSettings.sparkConfigMap
+  val hadoopConfigMap = sparkSettings.hadoopConfigMap
 
   for (entry <- conf.entrySet()) {
     val k = entry.getKey
@@ -49,6 +50,9 @@ class SparkStreamingSettings(config: Config, args: Array[String]) extends Serial
     }
     if (k.startsWith("kafka.")) {
       kafkaConfigMap.put(k.substring(6), v)
+    }
+    if(k.startsWith("hadoop.")) {
+      hadoopConfigMap.put(k.substring(7, k.length), v)
     }
   }
 }

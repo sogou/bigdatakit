@@ -4,7 +4,7 @@ import com.sogou.bigdatakit.common.util.CommonUtils._
 import com.sogou.bigdatakit.kafka.serializer.AvroFlumeEventBodyDecoder
 import com.sogou.bigdatakit.streaming.processor.LineProcessor
 import kafka.serializer.StringDecoder
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -35,8 +35,9 @@ class ReceiverBasedSparkStreamingDriver(settings: SparkStreamingSettings)
     for ((k, v) <- settings.sparkConfigMap) conf.set(k, v)
     conf.setAppName(settings.SPARK_APP_NAME).setMaster(settings.SPARK_MASTER_URL).
       set("spark.scheduler.mode", "FAIR")
-
-    sscOpt = Some(new StreamingContext(conf, batchDuration))
+    val sc = new SparkContext(conf)
+    for((k, v) <- settings.hadoopConfigMap) sc.hadoopConfiguration.set(k, v)
+    sscOpt = Some(new StreamingContext(sc, batchDuration))
 
     val inputStream = KafkaUtils.createStream[
       String, String, StringDecoder, AvroFlumeEventBodyDecoder](

@@ -17,6 +17,7 @@ class SparkSettings(config: Config, args: Array[String]) extends Serializable {
   import scala.collection.JavaConversions._
 
   val sparkConfigMap = new mutable.HashMap[String, String]()
+  val hadoopConfigMap = new mutable.HashMap[String, String]()
 
   for (entry <- conf.entrySet()) {
     val k = entry.getKey
@@ -24,6 +25,9 @@ class SparkSettings(config: Config, args: Array[String]) extends Serializable {
 
     if (k.startsWith("spark.")) {
       sparkConfigMap.put(k, v)
+    }
+    if(k.startsWith("hadoop.")) {
+      hadoopConfigMap.put(k.substring(7, k.length), v)
     }
   }
 }
